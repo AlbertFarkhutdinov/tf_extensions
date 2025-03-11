@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 from keras.datasets import mnist
 from keras.layers import Dense, Flatten, Input, Reshape
 from keras.models import Model
@@ -38,7 +39,7 @@ def create_dense_ae(
     return encoder, decoder, autoencoder
 
 
-def run():
+def run() -> tuple[tf.Tensor, tf.Tensor]:
     img_shape = (28, 28, 1)
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
 

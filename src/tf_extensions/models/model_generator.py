@@ -16,13 +16,13 @@ class ModelConfig(BaseConfig):
     dropout_rate_residual: float = None
     initial_filters: int = 64
     residual_filters: int = None
-    kernel_size: tuple[int, int] = (3, 3)
+    kernel_size: tuple[int, ...] = (3, 3)
     max_filters: int = None
     model_depth: int = 3
     padding: str = 'same'
     residual_blocks_number: int = 3
-    strides: tuple[int, int] = (2, 2)
-    residual_strides: tuple[int, int] = (2, 2)
+    strides: tuple[int, ...] = (2, 2)
+    residual_strides: tuple[int, ...] = (2, 2)
     use_bias: bool = False
     use_bias_residual: bool = True
     with_bn: bool = True

@@ -7,7 +7,7 @@ from tf_extensions.layers import ASPPLayer
 
 class TestASPPLayer:
 
-    def test_init(self):
+    def test_init(self) -> None:
         filters_number = 2
         dilation_scale = 2
         layer = ASPPLayer(
@@ -58,13 +58,13 @@ class TestASPPLayer:
     )
     def test_call(
         self,
-        inputs,
-        filters,
-        kernel_size,
-        dil_scale,
-        dil_number,
-        expected_shape,
-    ):
+        inputs: tf.Tensor,
+        filters: int,
+        kernel_size: tuple[int, ...],
+        dil_scale: int,
+        dil_number: int,
+        expected_shape: tuple[int, ...],
+    ) -> None:
         output = ASPPLayer(
             filters_number=filters,
             kernel_size=kernel_size,

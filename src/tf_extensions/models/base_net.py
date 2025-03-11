@@ -74,7 +74,7 @@ class BaseNet(tf.keras.Model):
 
     def __init__(
         self,
-        config=None,
+        config: BaseNetConfig = None,
         include_top: bool = True,
     ) -> None:
         """Initialize self. See help(type(self)) for accurate signature."""
@@ -111,7 +111,7 @@ class BaseNet(tf.keras.Model):
         """
         return inputs
 
-    def build_graph(self, input_shape: tuple[int, int, int]) -> tf.keras.Model:
+    def build_graph(self, input_shape: tuple[int, ...]) -> tf.keras.Model:
         """
         Build a Keras model graph based on the specified input shape.
 
@@ -134,7 +134,7 @@ class BaseNet(tf.keras.Model):
 
     def plot(
         self,
-        input_shape: tuple[int, int, int],
+        input_shape: tuple[int, ...],
         *args,
         **kwargs,
     ) -> display.Image:
@@ -169,7 +169,7 @@ class BaseNet(tf.keras.Model):
     def get_convolutional_block(
         self,
         filter_scale: int,
-        kernel_size: tuple[int, int] = None,
+        kernel_size: tuple[int, ...] = None,
         is_dropout_off: bool = False,
     ) -> ConvolutionalBlock:
         """

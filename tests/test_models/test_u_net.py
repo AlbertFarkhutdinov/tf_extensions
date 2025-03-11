@@ -63,7 +63,7 @@ def_u_net = {
 
 class TestUNetConfig:
 
-    def test_init(self):
+    def test_init(self) -> None:
         config = UNetConfig()
         assert config.conv_block_config == cc.ConvolutionalBlockConfig()
         filters_number = config.initial_filters_number
@@ -79,15 +79,15 @@ class TestUNetConfig:
         assert config.first_kernel_size == def_u_net['first_kernel_size']
         assert config.vector_length == def_u_net['vector_length']
 
-    def test_as_dict(self):
+    def test_as_dict(self) -> None:
         config = UNetConfig()
         assert config.as_dict() == def_u_net
 
-    def test_from_dict(self):
+    def test_from_dict(self) -> None:
         config = UNetConfig()
         assert config.from_dict(properties=def_u_net) == config
 
-    def test_config_name(self):
+    def test_config_name(self) -> None:
         unet_config = UNetConfig(
             with_attention=True,
             without_reducing_filters=True,
@@ -116,7 +116,7 @@ class TestUNetConfig:
 
 class TestUNet:
 
-    def test_init_without_args(self):
+    def test_init_without_args(self) -> None:
         model = UNet()
         assert isinstance(model.config, UNetConfig)
 
@@ -127,7 +127,11 @@ class TestUNet:
             (64, (4, 4)),
         ],
     )
-    def test_init_fail(self, filters, first_kernel_size):
+    def test_init_fail(
+        self,
+        filters: int,
+        first_kernel_size: tuple[int, ...],
+    ) -> None:
         with pytest.raises(
             ValueError,
             match='Odd `first_kernel_size` is recommended.',
@@ -140,7 +144,7 @@ class TestUNet:
             )
 
     @pytest.mark.parametrize('config', u_net_configs)
-    def test_init(self, config):
+    def test_init(self, config: UNetConfig) -> None:
         model = UNet(config=config)
         assert model.config == config
         length = config.path_length
@@ -175,7 +179,11 @@ class TestUNet:
         ('shape', 'config'),
         [((3, 128, 128, 1), config) for config in u_net_configs],
     )
-    def test_call(self, shape, config):
+    def test_call(
+        self,
+        shape: tuple[int, ...],
+        config: UNetConfig,
+    ) -> None:
         model = UNet(config=config)
         output = model.call(inputs=tf.random.normal(shape=shape))
         exp_shape = shape

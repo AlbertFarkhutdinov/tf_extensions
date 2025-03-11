@@ -39,21 +39,21 @@ def_base_net = {
 
 class TestBaseNetConfig:
 
-    def test_init(self):
+    def test_init(self) -> None:
         config = BaseNetConfig()
         assert config.conv_block_config == cc.ConvolutionalBlockConfig()
         filters_number = config.initial_filters_number
         assert filters_number == def_base_net['initial_filters_number']
 
-    def test_as_dict(self):
+    def test_as_dict(self) -> None:
         config = BaseNetConfig()
         assert config.as_dict() == def_base_net
 
-    def test_from_dict(self):
+    def test_from_dict(self) -> None:
         config = BaseNetConfig()
         assert config.from_dict(properties=def_base_net) == config
 
-    def test_config_name(self):
+    def test_config_name(self) -> None:
         conv_block_config = cc.ConvolutionalBlockConfig()
         custom_seg_net_config = BaseNetConfig(
             conv_block_config=conv_block_config,
@@ -66,7 +66,7 @@ class TestBaseNetConfig:
 
 class TestBaseNet:
 
-    def test_init_without_args(self):
+    def test_init_without_args(self) -> None:
         model = BaseNet()
         assert isinstance(model.config, BaseNetConfig)
 
@@ -84,14 +84,14 @@ class TestBaseNet:
     )
     def test_init(
         self,
-        filters,
-        kernel,
-        activation,
-        bias,
-        bn,
-        dropout,
-        initializer,
-    ):
+        filters: int,
+        kernel: tuple[int, ...],
+        activation: str,
+        bias: bool,
+        bn: bool,
+        dropout: bool,
+        initializer: str,
+    ) -> None:
         model = BaseNet(
             config=BaseNetConfig(
                 initial_filters_number=filters,
@@ -125,7 +125,11 @@ class TestBaseNet:
             (64, (4, 4)),
         ],
     )
-    def test_init_fail(self, filters, kernel_size):
+    def test_init_fail(
+        self,
+        filters: int,
+        kernel_size: tuple[int, ...],
+    ) -> None:
         with pytest.raises(
             ValueError,
             match='Odd `kernel_size` is recommended.',
@@ -156,15 +160,15 @@ class TestBaseNet:
     )
     def test_build_graph(
         self,
-        input_shape,
-        filters,
-        kernel,
-        activation,
-        bias,
-        bn,
-        dropout,
-        initializer,
-    ):
+        input_shape: tuple[int, ...],
+        filters: int,
+        kernel: tuple[int, ...],
+        activation: str,
+        bias: bool,
+        bn: bool,
+        dropout: bool,
+        initializer: str,
+    ) -> None:
         model = BaseNet(
             config=BaseNetConfig(
                 initial_filters_number=filters,
@@ -203,16 +207,16 @@ class TestBaseNet:
     )
     def test_get_convolutional_pair(
         self,
-        filter_scale,
-        conv_kernel,
-        filters,
-        kernel,
-        act,
-        bias,
-        bn,
-        dropout,
-        init,
-    ):
+        filter_scale: int,
+        conv_kernel: tuple[int, ...],
+        filters: int,
+        kernel: tuple[int, ...],
+        act: str,
+        bias: bool,
+        bn: bool,
+        dropout: bool,
+        init: str,
+    ) -> None:
         model = BaseNet(
             config=BaseNetConfig(
                 initial_filters_number=filters,

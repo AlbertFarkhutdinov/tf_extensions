@@ -24,7 +24,7 @@ class Conv2DConfig(BaseConfig):
 
     """
 
-    kernel_size: tuple[int, int] = (3, 3)
+    kernel_size: tuple[int, ...] = (3, 3)
     padding: str = 'same'
     use_bias: bool = True
     kernel_initializer: str = 'glorot_uniform'

@@ -24,7 +24,13 @@ class TestSkippedConnections:
             (16, cc.ConvolutionalBlockConfig(), 0, True),
         ],
     )
-    def test_init(self, filters, config, is_skipped_concat, blocks_number):
+    def test_init(
+        self,
+        filters: int,
+        config: cc.ConvolutionalBlockConfig,
+        is_skipped_concat: bool,
+        blocks_number: int,
+    ) -> None:
         layer = cl.SkippedConnections(
             filters=filters,
             config=config,
@@ -80,13 +86,13 @@ class TestSkippedConnections:
     )
     def test_call(
         self,
-        input_shape,
-        filters,
-        config,
-        is_skipped_concat,
-        blocks_number,
-        exp_shape,
-    ):
+        input_shape: tuple[int, ...],
+        filters: int,
+        config: cc.ConvolutionalBlockConfig,
+        is_skipped_concat: bool,
+        blocks_number: int,
+        exp_shape: tuple[int, ...],
+    ) -> None:
         output = cl.SkippedConnections(
             filters=filters,
             config=config,

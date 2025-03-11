@@ -21,7 +21,7 @@ aspp_net_properties = [
 
 class TestASPPNet:
 
-    def test_init_without_args(self):
+    def test_init_without_args(self) -> None:
         model = ASPPNet()
         assert isinstance(model.config, BaseNetConfig)
 
@@ -39,14 +39,14 @@ class TestASPPNet:
     )
     def test_init(
         self,
-        filters,
-        kernel,
-        activation,
-        bias,
-        bn,
-        dropout,
-        initializer,
-    ):
+        filters: int,
+        kernel: tuple[int, ...],
+        activation: str,
+        bias: bool,
+        bn: bool,
+        dropout: bool,
+        initializer: str,
+    ) -> None:
         model = ASPPNet(
             config=BaseNetConfig(
                 initial_filters_number=filters,
@@ -122,15 +122,15 @@ class TestASPPNet:
     )
     def test_call(
         self,
-        input_shape,
-        filters,
-        kernel,
-        activation,
-        bias,
-        bn,
-        dropout,
-        initializer,
-    ):
+        input_shape: tuple[int, ...],
+        filters: int,
+        kernel: tuple[int, ...],
+        activation: str,
+        bias: bool,
+        bn: bool,
+        dropout: bool,
+        initializer: str,
+    ) -> None:
         model = ASPPNet(
             config=BaseNetConfig(
                 initial_filters_number=filters,

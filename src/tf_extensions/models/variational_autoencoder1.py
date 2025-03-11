@@ -5,7 +5,7 @@ import tensorflow as tf
 class Sampling(tf.keras.layers.Layer):
     """Uses (z_mean, z_log_var) to sample z, the vector encoding a digit."""
 
-    def call(self, inputs, *args, **kwargs):
+    def call(self, inputs: tf.Tensor, *args, **kwargs) -> tf.Tensor:
         z_mean, z_log_var = inputs
         batch = tf.shape(z_mean)[0]
         dim = tf.shape(z_mean)[1]
@@ -13,7 +13,7 @@ class Sampling(tf.keras.layers.Layer):
         return z_mean + tf.exp(0.5 * z_log_var) * epsilon
 
 
-def get_encoder():
+def get_encoder() -> tf.keras.Model:
     latent_dim = 2
     encoder_inputs = tf.keras.Input(shape=(28, 28, 1))
     x = tf.keras.layers.Conv2D(
@@ -42,7 +42,7 @@ def get_encoder():
     )
 
 
-def get_decoder():
+def get_decoder() -> tf.keras.Model:
     latent_dim = 2
     latent_inputs = tf.keras.Input(shape=(latent_dim,))
     x = tf.keras.layers.Dense(7 * 7 * 64, activation='relu')(latent_inputs)
@@ -76,8 +76,13 @@ def get_decoder():
 
 class VAE(tf.keras.Model):
 
-    def __init__(self, encoder, decoder, **kwargs):
-        super().__init__()
+    def __init__(
+        self,
+        encoder: tf.keras.Model,
+        decoder: tf.keras.Model,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
         self.encoder = encoder
         self.decoder = decoder
         self.total_loss_tracker = tf.keras.metrics.Mean(name='total_loss')
@@ -94,13 +99,16 @@ class VAE(tf.keras.Model):
             self.kl_loss_tracker,
         ]
 
-    def train_step(self, data):
+    def train_step(self, inputs: tf.Tensor):
         with tf.GradientTape() as tape:
-            z_mean, z_log_var, z = self.encoder(data)
+            z_mean, z_log_var, z = self.encoder(inputs)
             reconstruction = self.decoder(z)
             reconstruction_loss = tf.reduce_mean(
                 tf.reduce_sum(
-                    tf.keras.losses.binary_crossentropy(data, reconstruction),
+                    tf.keras.losses.binary_crossentropy(
+                        inputs,
+                        reconstruction,
+                    ),
                     axis=(1, 2),
                 ),
             )
@@ -122,7 +130,7 @@ class VAE(tf.keras.Model):
         }
 
 
-def train_vae():
+def train_vae() -> None:
     (x_train, _), (x_test, _) = tf.keras.datasets.mnist.load_data()
     mnist_digits = np.concatenate([x_train, x_test], axis=0)
     mnist_digits = np.expand_dims(mnist_digits, -1).astype('float32') / 255

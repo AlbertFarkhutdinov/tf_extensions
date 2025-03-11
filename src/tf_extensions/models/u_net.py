@@ -48,7 +48,7 @@ class UNetConfig(SegNetConfig):
     out_residual_blocks_number: int = 0
     is_skipped_with_concat: bool = True
     with_variable_kernel: bool = False
-    first_kernel_size: tuple[int, int] = None
+    first_kernel_size: tuple[int, ...] = None
     vector_length: int = None
     is_binary_classification: bool = False
 

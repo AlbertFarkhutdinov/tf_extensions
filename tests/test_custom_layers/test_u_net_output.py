@@ -20,7 +20,11 @@ class TestUNetOutputLayer:
             (2, cc.Conv2DConfig()),
         ],
     )
-    def test_init(self, vector_length, conv2d_config):
+    def test_init(
+        self,
+        vector_length: int,
+        conv2d_config: cc.Conv2DConfig,
+    ) -> None:
         layer = cl.UNetOutputLayer(
             vector_length=vector_length,
             conv2d_config=conv2d_config,
@@ -46,7 +50,13 @@ class TestUNetOutputLayer:
             ((3, 128, 128, 1), 2, cc.Conv2DConfig(), (3, 128, 1, 1)),
         ],
     )
-    def test_call(self, input_shape, vector_length, conv2d_config, exp_shape):
+    def test_call(
+        self,
+        input_shape: tuple[int, ...],
+        vector_length: int,
+        conv2d_config: cc.Conv2DConfig,
+        exp_shape: tuple[int, ...],
+    ) -> None:
         output = cl.UNetOutputLayer(
             vector_length=vector_length,
             conv2d_config=conv2d_config,

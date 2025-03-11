@@ -19,12 +19,12 @@ class TestConvolutionalBlock:
     )
     def test_init(
         self,
-        filters,
-        layers_number,
-        with_bn,
-        with_dropout,
-        activation,
-    ):
+        filters: int,
+        layers_number: int,
+        with_bn: bool,
+        with_dropout: bool,
+        activation: str,
+    ) -> None:
         block = cl.ConvolutionalBlock(
             filters=filters,
             config=cc.ConvolutionalBlockConfig(
@@ -109,14 +109,14 @@ class TestConvolutionalBlock:
     )
     def test_call(
         self,
-        inputs,
-        exp_shape,
-        filters,
-        layers_number,
-        bn,
-        dropout,
-        activation,
-    ):
+        inputs: tf.Tensor,
+        exp_shape: tuple[int, ...],
+        filters: int,
+        layers_number: int,
+        bn: bool,
+        dropout: bool,
+        activation: str,
+    ) -> None:
         output = cl.ConvolutionalBlock(
             filters=filters,
             config=cc.ConvolutionalBlockConfig(

@@ -24,8 +24,8 @@ class MaxPoolingWithArgmax2D(tf.keras.layers.Layer):
 
     def __init__(
         self,
-        pool_size: tuple[int, int] = (2, 2),
-        strides: tuple[int, int] = (2, 2),
+        pool_size: tuple[int, ...] = (2, 2),
+        strides: tuple[int, ...] = (2, 2),
         padding: str = 'same',
         *args,
         **kwargs,

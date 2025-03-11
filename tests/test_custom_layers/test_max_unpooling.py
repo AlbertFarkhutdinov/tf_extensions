@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 import pytest
 
 from tf_extensions.layers import MaxUnpooling2D
@@ -6,7 +7,7 @@ from tf_extensions.layers import MaxUnpooling2D
 
 class TestMaxUnpooling2D:
 
-    def test_init(self):
+    def test_init(self) -> None:
         assert MaxUnpooling2D().pool_size == (2, 2)
 
     @pytest.mark.parametrize(
@@ -15,7 +16,11 @@ class TestMaxUnpooling2D:
             ([(2, 64, 64, 1), (2, 64, 64, 1)], (2, 128, 128, 1)),
         ],
     )
-    def test_compute_output_shape(self, input_shape, expected):
+    def test_compute_output_shape(
+        self,
+        input_shape: list[tuple[int, ...]],
+        expected: tuple[int, ...],
+    ) -> None:
         assert MaxUnpooling2D().compute_output_shape(
             input_shape=input_shape,
         ) == expected
@@ -49,6 +54,11 @@ class TestMaxUnpooling2D:
             ),
         ],
     )
-    def test_call(self, mp_values, mp_indices, expected):
+    def test_call(
+        self,
+        mp_values: tf.Tensor,
+        mp_indices: tf.Tensor,
+        expected: tf.Tensor,
+    ) -> None:
         unpooled = MaxUnpooling2D()(inputs=[mp_values, mp_indices])
         assert np.allclose(unpooled, expected)

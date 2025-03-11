@@ -19,22 +19,22 @@ def_conv_block = {
 
 class TestConv2DConfig:
 
-    def test_init(self):
+    def test_init(self) -> None:
         config = cc.Conv2DConfig()
         assert config.kernel_size == def_conv2d['kernel_size']
         assert config.padding == def_conv2d['padding']
         assert config.use_bias == def_conv2d['use_bias']
         assert config.kernel_initializer == def_conv2d['kernel_initializer']
 
-    def test_as_dict(self):
+    def test_as_dict(self) -> None:
         config = cc.Conv2DConfig()
         assert config.as_dict() == def_conv2d
 
-    def test_from_dict(self):
+    def test_from_dict(self) -> None:
         config = cc.Conv2DConfig()
         assert config.from_dict(properties=def_conv2d) == config
 
-    def test_config_name(self):
+    def test_config_name(self) -> None:
         config = cc.Conv2DConfig(
             kernel_size=(5, 5),
             padding='valid',
@@ -47,7 +47,7 @@ class TestConv2DConfig:
 
 class TestConvolutionalBlockConfig:
 
-    def test_init(self):
+    def test_init(self) -> None:
         config = cc.ConvolutionalBlockConfig()
         assert config.conv2d_config == cc.Conv2DConfig()
         assert config.layers_number == def_conv_block['layers_number']
@@ -55,15 +55,15 @@ class TestConvolutionalBlockConfig:
         assert config.with_bn == def_conv_block['with_bn']
         assert config.with_dropout == def_conv_block['with_dropout']
 
-    def test_as_dict(self):
+    def test_as_dict(self) -> None:
         config = cc.ConvolutionalBlockConfig()
         assert config.as_dict() == def_conv_block
 
-    def test_from_dict(self):
+    def test_from_dict(self) -> None:
         config = cc.ConvolutionalBlockConfig()
         assert config.from_dict(properties=def_conv_block) == config
 
-    def test_config_name(self):
+    def test_config_name(self) -> None:
         conv2d_config = cc.Conv2DConfig(kernel_size=(5, 5))
         config = cc.ConvolutionalBlockConfig(
             conv2d_config=conv2d_config,

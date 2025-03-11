@@ -19,7 +19,7 @@ class MaxUnpooling2D(tf.keras.layers.Layer):
 
     def __init__(
         self,
-        pool_size: tuple[int, int] = (2, 2),
+        pool_size: tuple[int, ...] = (2, 2),
         *args,
         **kwargs,
     ) -> None:

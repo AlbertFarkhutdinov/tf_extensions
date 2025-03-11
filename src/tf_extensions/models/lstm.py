@@ -33,7 +33,7 @@ class LSTMCell(tf.keras.Model):
         input_tensor: tf.Tensor,
         hidden: tf.Tensor,
         cell_state: tf.Tensor,
-    ):
+    ) -> tuple[tf.Tensor, tf.Tensor]:
         """Call self as a function."""
         i_output = tf.nn.sigmoid(
             self.input_gate.output(input_tensor, hidden),

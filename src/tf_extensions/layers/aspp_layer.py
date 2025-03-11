@@ -27,7 +27,7 @@ class ASPPLayer(tf.keras.layers.Layer):
         filters_number: int,
         dilation_scale: int,
         dilation_number: int = 3,
-        kernel_size: tuple[int, int] = (3, 3),
+        kernel_size: tuple[int, ...] = (3, 3),
         *args,
         **kwargs,
     ) -> None:

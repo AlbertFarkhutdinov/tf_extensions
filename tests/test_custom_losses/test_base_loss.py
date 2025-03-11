@@ -205,10 +205,10 @@ class TestBaseLoss:
     def test_normalize_images(
         self,
         loss_type,
-        tensor1,
-        tensor2,
-        tensor1n,
-        tensor2n,
+        tensor1: tf.Tensor,
+        tensor2: tf.Tensor,
+        tensor1n: tf.Tensor,
+        tensor2n: tf.Tensor,
     ) -> None:
         y_true, y_pred = loss_type(
             is_normalized=True,

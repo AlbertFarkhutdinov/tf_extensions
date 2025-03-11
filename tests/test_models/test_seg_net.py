@@ -45,7 +45,7 @@ def_seg_net = {
 
 class TestSegNetConfig:
 
-    def test_init(self):
+    def test_init(self) -> None:
         config = SegNetConfig()
         assert config.conv_block_config == cc.ConvolutionalBlockConfig()
         filters_number = config.initial_filters_number
@@ -53,15 +53,15 @@ class TestSegNetConfig:
         assert config.path_length == def_seg_net['path_length']
         assert config.pooling == def_seg_net['pooling']
 
-    def test_as_dict(self):
+    def test_as_dict(self) -> None:
         config = SegNetConfig()
         assert config.as_dict() == def_seg_net
 
-    def test_from_dict(self):
+    def test_from_dict(self) -> None:
         config = SegNetConfig()
         assert config.from_dict(properties=def_seg_net) == config
 
-    def test_config_name(self):
+    def test_config_name(self) -> None:
         seg_net_config = SegNetConfig(
             path_length=5,
             pooling=3,
@@ -74,7 +74,7 @@ class TestSegNetConfig:
 
 class TestSegNet:
 
-    def test_init_without_args(self):
+    def test_init_without_args(self) -> None:
         model = SegNet()
         assert isinstance(model.config, SegNetConfig)
 
@@ -95,17 +95,17 @@ class TestSegNet:
     )
     def test_init(
         self,
-        filters,
-        kernel,
-        act,
-        bias,
-        bn,
-        dropout,
-        init,
-        length,
-        pooling,
-        layers,
-    ):
+        filters: int,
+        kernel: tuple[int, ...],
+        act: str,
+        bias: bool,
+        bn: bool,
+        dropout: bool,
+        init: str,
+        length: int,
+        pooling: int,
+        layers: int,
+    ) -> None:
         model = SegNet(
             config=SegNetConfig(
                 initial_filters_number=filters,
@@ -169,18 +169,18 @@ class TestSegNet:
     )
     def test_call(
         self,
-        shape,
-        filters,
-        kernel,
-        act,
-        bias,
-        bn,
-        dropout,
-        init,
-        length,
-        pooling,
-        layers,
-    ):
+        shape: tuple[int, ...],
+        filters: int,
+        kernel: tuple[int, ...],
+        act: str,
+        bias: bool,
+        bn: bool,
+        dropout: bool,
+        init: str,
+        length: int,
+        pooling: int,
+        layers: int,
+    ) -> None:
         model = SegNet(
             config=SegNetConfig(
                 initial_filters_number=filters,

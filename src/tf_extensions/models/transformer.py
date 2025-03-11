@@ -6,7 +6,11 @@ from tf_extensions.auxiliary.custom_types import MaskType, TrainingType
 
 class MultiHeadSelfAttention(tf.keras.layers.Layer):
 
-    def __init__(self, embed_dim, num_heads):
+    def __init__(
+        self,
+        embed_dim: int,
+        num_heads: int,
+    ) -> None:
         super().__init__()
         self.num_heads = num_heads
         self.embed_dim = embed_dim
@@ -18,11 +22,20 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
 
         self.dense = tf.keras.layers.Dense(embed_dim)
 
-    def split_heads(self, x, batch_size):
-        x = tf.reshape(x, shape=(batch_size, -1, self.num_heads, self.depth))
-        return tf.transpose(x, perm=[0, 2, 1, 3])
+    def split_heads(
+        self,
+        inputs: tf.Tensor,
+        batch_size: int,
+    ) -> tf.Tensor:
+        return tf.transpose(
+            tf.reshape(
+                inputs,
+                shape=(batch_size, -1, self.num_heads, self.depth),
+            ),
+            perm=[0, 2, 1, 3],
+        )
 
-    def call(self, inputs, *args, **kwargs):
+    def call(self, inputs: tf.Tensor, *args, **kwargs) -> tf.Tensor:
         batch_size = tf.shape(inputs)[0]
 
         q = self.split_heads(self.wq(inputs), batch_size)
@@ -45,18 +58,28 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
 
 class FeedForwardNetwork(tf.keras.layers.Layer):
 
-    def __init__(self, embed_dim, hidden_dim):
+    def __init__(
+        self,
+        embed_dim: int,
+        hidden_dim: int,
+    ) -> None:
         super().__init__()
         self.fc1 = tf.keras.layers.Dense(hidden_dim, activation='relu')
         self.fc2 = tf.keras.layers.Dense(embed_dim)
 
-    def call(self, inputs, *args, **kwargs):
+    def call(self, inputs: tf.Tensor, *args, **kwargs) -> tf.Tensor:
         return self.fc2(self.fc1(inputs))
 
 
 class TransformerBlock(tf.keras.Model):
 
-    def __init__(self, embed_dim, num_heads, hidden_dim, dropout_rate=0.1):
+    def __init__(
+        self,
+        embed_dim: int,
+        num_heads: int,
+        hidden_dim: int,
+        dropout_rate: float = 0.1,
+    ) -> None:
         super().__init__()
         self.attn = MultiHeadSelfAttention(embed_dim, num_heads)
         self.ffn = FeedForwardNetwork(embed_dim, hidden_dim)
@@ -83,12 +106,20 @@ class TransformerBlock(tf.keras.Model):
 
 class PositionalEncoding(tf.keras.layers.Layer):
 
-    def __init__(self, max_len, embed_dim):
+    def __init__(
+        self,
+        max_len: int,
+        embed_dim: int,
+    ) -> None:
         super().__init__()
         self.pos_encoding = self.positional_encoding(max_len, embed_dim)
 
     @classmethod
-    def positional_encoding(cls, max_len, embed_dim):
+    def positional_encoding(
+        cls,
+        max_len: int,
+        embed_dim: int,
+    ) -> tf.Tensor:
         pos = np.arange(max_len)[:, np.newaxis]
         i = np.arange(embed_dim)[np.newaxis, :]
         angles = pos / np.power(10000, (2 * (i // 2)) / embed_dim)
@@ -97,7 +128,12 @@ class PositionalEncoding(tf.keras.layers.Layer):
         pos_encoding[:, 1::2] = np.cos(angles[:, 1::2])
         return tf.cast(pos_encoding[np.newaxis, ...], dtype=tf.float32)
 
-    def call(self, inputs, *args, **kwargs):
+    def call(
+        self,
+        inputs: tf.Tensor,
+        *args,
+        **kwargs,
+    ) -> tf.Tensor:
         return inputs + self.pos_encoding[:, :tf.shape(inputs)[1], :]
 
 
@@ -105,13 +141,13 @@ class Transformer(tf.keras.Model):
 
     def __init__(
         self,
-        vocab_size,
-        max_len,
-        embed_dim,
-        num_heads,
-        hidden_dim,
-        num_layers,
-    ):
+        vocab_size: int,
+        max_len: int,
+        embed_dim: int,
+        num_heads: int,
+        hidden_dim: int,
+        num_layers: int,
+    ) -> None:
         super().__init__()
         self.embedding = tf.keras.layers.Embedding(vocab_size, embed_dim)
         self.pos_encoding = PositionalEncoding(max_len, embed_dim)
@@ -138,7 +174,7 @@ class Transformer(tf.keras.Model):
         return self.final_layer(x)
 
 
-def run():
+def run() -> tf.Tensor:
     vocab_size = 10000
     max_len = 100
     embed_dim = 512
@@ -160,8 +196,7 @@ def run():
         minval=0,
         maxval=vocab_size,
     )
-    outputs = transformer(inputs)
-    return outputs.shape  # Expected: (batch_size, max_len, vocab_size)
+    return transformer(inputs)  # Shape: (batch_size, max_len, vocab_size)
 
 
 if __name__ == '__main__':
