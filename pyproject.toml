@@ -12,7 +12,6 @@ dependencies = [
     "ipython (<9.1)",
     "keras (<2.15)",
     "numpy (<1.24)",
-    "pandas (<2.3)",
     "pytest (<8.4)",
     "pyyaml (<6.1)",
     "tensorflow (<2.15)",
