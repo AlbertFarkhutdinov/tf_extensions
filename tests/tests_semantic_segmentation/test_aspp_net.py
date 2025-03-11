@@ -2,16 +2,9 @@ import numpy as np
 import pytest
 import tensorflow as tf
 
+from tf_extensions.semantic_segmentation import configs as cfg
+from tf_extensions.semantic_segmentation import custom_layers as cl
 from tf_extensions.semantic_segmentation.aspp import ASPPNet
-from tf_extensions.semantic_segmentation.configs import (
-    Conv2DConfig,
-    ConvolutionalBlockConfig,
-    CustomSegmentationNetConfig,
-)
-from tf_extensions.semantic_segmentation.custom_layers import (
-    ASPPLayer,
-    ConvolutionalBlock,
-)
 
 aspp_net_properties = [
     (
@@ -30,7 +23,7 @@ class TestASPPNet:
 
     def test_init_without_args(self):
         model = ASPPNet()
-        assert isinstance(model.config, CustomSegmentationNetConfig)
+        assert isinstance(model.config, cfg.CustomSegmentationNetConfig)
 
     @pytest.mark.parametrize(
         (
@@ -55,10 +48,10 @@ class TestASPPNet:
         initializer,
     ):
         model = ASPPNet(
-            config=CustomSegmentationNetConfig(
+            config=cfg.CustomSegmentationNetConfig(
                 initial_filters_number=filters,
-                conv_block_config=ConvolutionalBlockConfig(
-                    conv2d_config=Conv2DConfig(
+                conv_block_config=cfg.ConvolutionalBlockConfig(
+                    conv2d_config=cfg.Conv2DConfig(
                         kernel_size=kernel,
                         use_bias=bias,
                         kernel_initializer=initializer,
@@ -78,7 +71,7 @@ class TestASPPNet:
             model.conv_pair5,
             model.conv_pair6,
         )):
-            assert isinstance(conv_block, ConvolutionalBlock)
+            assert isinstance(conv_block, cl.ConvolutionalBlock)
             assert conv_block.filters == filters * scales[i]
             assert conv_block.config.with_bn == bn
             assert conv_block.config.with_dropout == dropout
@@ -97,7 +90,7 @@ class TestASPPNet:
             assert conv_layer.kernel_size == (1, 1)
         assert model.conv_middle.filters == 48
         assert model.conv_out.filters == 1
-        assert isinstance(model.aspp, ASPPLayer)
+        assert isinstance(model.aspp, cl.ASPPLayer)
         assert model.aspp.conv_kwargs['filters'] == 256
         assert model.aspp.conv_kwargs['padding'] == 'same'
         assert model.aspp.conv_kwargs['activation'] == 'relu'
@@ -139,10 +132,10 @@ class TestASPPNet:
         initializer,
     ):
         model = ASPPNet(
-            config=CustomSegmentationNetConfig(
+            config=cfg.CustomSegmentationNetConfig(
                 initial_filters_number=filters,
-                conv_block_config=ConvolutionalBlockConfig(
-                    conv2d_config=Conv2DConfig(
+                conv_block_config=cfg.ConvolutionalBlockConfig(
+                    conv2d_config=cfg.Conv2DConfig(
                         kernel_size=kernel,
                         use_bias=bias,
                         kernel_initializer=initializer,

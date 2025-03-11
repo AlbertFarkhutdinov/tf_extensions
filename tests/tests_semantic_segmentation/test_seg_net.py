@@ -2,11 +2,7 @@ import numpy as np
 import pytest
 import tensorflow as tf
 
-from tf_extensions.semantic_segmentation.configs import (
-    Conv2DConfig,
-    ConvolutionalBlockConfig,
-    SegNetConfig,
-)
+from tf_extensions.semantic_segmentation import configs as cfg
 from tf_extensions.semantic_segmentation.seg_net import SegNet
 
 seg_net_properties = [
@@ -29,7 +25,7 @@ class TestSegNet:
 
     def test_init_without_args(self):
         model = SegNet()
-        assert isinstance(model.config, SegNetConfig)
+        assert isinstance(model.config, cfg.SegNetConfig)
 
     @pytest.mark.parametrize(
         (
@@ -60,10 +56,10 @@ class TestSegNet:
         layers,
     ):
         model = SegNet(
-            config=SegNetConfig(
+            config=cfg.SegNetConfig(
                 initial_filters_number=filters,
-                conv_block_config=ConvolutionalBlockConfig(
-                    conv2d_config=Conv2DConfig(
+                conv_block_config=cfg.ConvolutionalBlockConfig(
+                    conv2d_config=cfg.Conv2DConfig(
                         kernel_size=kernel,
                         use_bias=bias,
                         kernel_initializer=init,
@@ -135,10 +131,10 @@ class TestSegNet:
         layers,
     ):
         model = SegNet(
-            config=SegNetConfig(
+            config=cfg.SegNetConfig(
                 initial_filters_number=filters,
-                conv_block_config=ConvolutionalBlockConfig(
-                    conv2d_config=Conv2DConfig(
+                conv_block_config=cfg.ConvolutionalBlockConfig(
+                    conv2d_config=cfg.Conv2DConfig(
                         kernel_size=kernel,
                         use_bias=bias,
                         kernel_initializer=init,

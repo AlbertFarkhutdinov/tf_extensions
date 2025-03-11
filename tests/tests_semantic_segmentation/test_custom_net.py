@@ -1,10 +1,6 @@
 import pytest
 
-from tf_extensions.semantic_segmentation.configs import (
-    Conv2DConfig,
-    ConvolutionalBlockConfig,
-    CustomSegmentationNetConfig,
-)
+from tf_extensions.semantic_segmentation import configs as cfg
 from tf_extensions.semantic_segmentation.custom_layers import ConvolutionalBlock
 from tf_extensions.semantic_segmentation.custom_net import CustomSegmentationNet
 
@@ -25,7 +21,7 @@ class TestCustomSegmentationNet:
 
     def test_init_without_args(self):
         model = CustomSegmentationNet()
-        assert isinstance(model.config, CustomSegmentationNetConfig)
+        assert isinstance(model.config, cfg.CustomSegmentationNetConfig)
 
     @pytest.mark.parametrize(
         (
@@ -50,10 +46,10 @@ class TestCustomSegmentationNet:
         initializer,
     ):
         model = CustomSegmentationNet(
-            config=CustomSegmentationNetConfig(
+            config=cfg.CustomSegmentationNetConfig(
                 initial_filters_number=filters,
-                conv_block_config=ConvolutionalBlockConfig(
-                    conv2d_config=Conv2DConfig(
+                conv_block_config=cfg.ConvolutionalBlockConfig(
+                    conv2d_config=cfg.Conv2DConfig(
                         kernel_size=kernel,
                         use_bias=bias,
                         kernel_initializer=initializer,
@@ -88,10 +84,10 @@ class TestCustomSegmentationNet:
             match='Odd `kernel_size` is recommended.',
         ):
             CustomSegmentationNet(
-                config=CustomSegmentationNetConfig(
+                config=cfg.CustomSegmentationNetConfig(
                     initial_filters_number=filters,
-                    conv_block_config=ConvolutionalBlockConfig(
-                        conv2d_config=Conv2DConfig(
+                    conv_block_config=cfg.ConvolutionalBlockConfig(
+                        conv2d_config=cfg.Conv2DConfig(
                             kernel_size=kernel_size,
                         ),
                     ),
@@ -123,10 +119,10 @@ class TestCustomSegmentationNet:
         initializer,
     ):
         model = CustomSegmentationNet(
-            config=CustomSegmentationNetConfig(
+            config=cfg.CustomSegmentationNetConfig(
                 initial_filters_number=filters,
-                conv_block_config=ConvolutionalBlockConfig(
-                    conv2d_config=Conv2DConfig(
+                conv_block_config=cfg.ConvolutionalBlockConfig(
+                    conv2d_config=cfg.Conv2DConfig(
                         kernel_size=kernel,
                         use_bias=bias,
                         kernel_initializer=initializer,
@@ -215,10 +211,10 @@ class TestCustomSegmentationNet:
         init,
     ):
         model = CustomSegmentationNet(
-            config=CustomSegmentationNetConfig(
+            config=cfg.CustomSegmentationNetConfig(
                 initial_filters_number=filters,
-                conv_block_config=ConvolutionalBlockConfig(
-                    conv2d_config=Conv2DConfig(
+                conv_block_config=cfg.ConvolutionalBlockConfig(
+                    conv2d_config=cfg.Conv2DConfig(
                         kernel_size=kernel,
                         use_bias=bias,
                         kernel_initializer=init,

@@ -1,10 +1,4 @@
-from tf_extensions.semantic_segmentation.configs import (
-    Conv2DConfig,
-    ConvolutionalBlockConfig,
-    CustomSegmentationNetConfig,
-    SegNetConfig,
-    UNetConfig,
-)
+from tf_extensions.semantic_segmentation import configs as cfg
 
 def_conv2d = {
     'kernel_size': (3, 3),
@@ -55,22 +49,22 @@ def_u_net = {
 class TestConv2DConfig:
 
     def test_init(self):
-        config = Conv2DConfig()
+        config = cfg.Conv2DConfig()
         assert config.kernel_size == def_conv2d['kernel_size']
         assert config.padding == def_conv2d['padding']
         assert config.use_bias == def_conv2d['use_bias']
         assert config.kernel_initializer == def_conv2d['kernel_initializer']
 
     def test_as_dict(self):
-        config = Conv2DConfig()
+        config = cfg.Conv2DConfig()
         assert config.as_dict() == def_conv2d
 
     def test_from_dict(self):
-        config = Conv2DConfig()
+        config = cfg.Conv2DConfig()
         assert config.from_dict(properties=def_conv2d) == config
 
     def test_config_name(self):
-        config = Conv2DConfig(
+        config = cfg.Conv2DConfig(
             kernel_size=(5, 5),
             padding='valid',
             use_bias=False,
@@ -83,24 +77,24 @@ class TestConv2DConfig:
 class TestConvolutionalBlockConfig:
 
     def test_init(self):
-        config = ConvolutionalBlockConfig()
-        assert config.conv2d_config == Conv2DConfig()
+        config = cfg.ConvolutionalBlockConfig()
+        assert config.conv2d_config == cfg.Conv2DConfig()
         assert config.layers_number == def_conv_block['layers_number']
         assert config.activation == def_conv_block['activation']
         assert config.with_bn == def_conv_block['with_bn']
         assert config.with_dropout == def_conv_block['with_dropout']
 
     def test_as_dict(self):
-        config = ConvolutionalBlockConfig()
+        config = cfg.ConvolutionalBlockConfig()
         assert config.as_dict() == def_conv_block
 
     def test_from_dict(self):
-        config = ConvolutionalBlockConfig()
+        config = cfg.ConvolutionalBlockConfig()
         assert config.from_dict(properties=def_conv_block) == config
 
     def test_config_name(self):
-        conv2d_config = Conv2DConfig(kernel_size=(5, 5))
-        config = ConvolutionalBlockConfig(
+        conv2d_config = cfg.Conv2DConfig(kernel_size=(5, 5))
+        config = cfg.ConvolutionalBlockConfig(
             conv2d_config=conv2d_config,
             layers_number=3,
             with_skipped=True,
@@ -115,22 +109,22 @@ class TestConvolutionalBlockConfig:
 class TestCustomSegmentationNetConfig:
 
     def test_init(self):
-        config = CustomSegmentationNetConfig()
-        assert config.conv_block_config == ConvolutionalBlockConfig()
+        config = cfg.CustomSegmentationNetConfig()
+        assert config.conv_block_config == cfg.ConvolutionalBlockConfig()
         filters_number = config.initial_filters_number
         assert filters_number == def_custom_net['initial_filters_number']
 
     def test_as_dict(self):
-        config = CustomSegmentationNetConfig()
+        config = cfg.CustomSegmentationNetConfig()
         assert config.as_dict() == def_custom_net
 
     def test_from_dict(self):
-        config = CustomSegmentationNetConfig()
+        config = cfg.CustomSegmentationNetConfig()
         assert config.from_dict(properties=def_custom_net) == config
 
     def test_config_name(self):
-        conv_block_config = ConvolutionalBlockConfig()
-        custom_seg_net_config = CustomSegmentationNetConfig(
+        conv_block_config = cfg.ConvolutionalBlockConfig()
+        custom_seg_net_config = cfg.CustomSegmentationNetConfig(
             conv_block_config=conv_block_config,
             initial_filters_number=32,
             max_filters_number=64,
@@ -142,23 +136,23 @@ class TestCustomSegmentationNetConfig:
 class TestSegNetConfig:
 
     def test_init(self):
-        config = SegNetConfig()
-        assert config.conv_block_config == ConvolutionalBlockConfig()
+        config = cfg.SegNetConfig()
+        assert config.conv_block_config == cfg.ConvolutionalBlockConfig()
         filters_number = config.initial_filters_number
         assert filters_number == def_seg_net['initial_filters_number']
         assert config.path_length == def_seg_net['path_length']
         assert config.pooling == def_seg_net['pooling']
 
     def test_as_dict(self):
-        config = SegNetConfig()
+        config = cfg.SegNetConfig()
         assert config.as_dict() == def_seg_net
 
     def test_from_dict(self):
-        config = SegNetConfig()
+        config = cfg.SegNetConfig()
         assert config.from_dict(properties=def_seg_net) == config
 
     def test_config_name(self):
-        seg_net_config = SegNetConfig(
+        seg_net_config = cfg.SegNetConfig(
             path_length=5,
             pooling=3,
         )
@@ -171,8 +165,8 @@ class TestSegNetConfig:
 class TestUNetConfig:
 
     def test_init(self):
-        config = UNetConfig()
-        assert config.conv_block_config == ConvolutionalBlockConfig()
+        config = cfg.UNetConfig()
+        assert config.conv_block_config == cfg.ConvolutionalBlockConfig()
         filters_number = config.initial_filters_number
         wrf = config.without_reducing_filters
         out = config.out_residual_blocks_number
@@ -187,15 +181,15 @@ class TestUNetConfig:
         assert config.vector_length == def_u_net['vector_length']
 
     def test_as_dict(self):
-        config = UNetConfig()
+        config = cfg.UNetConfig()
         assert config.as_dict() == def_u_net
 
     def test_from_dict(self):
-        config = UNetConfig()
+        config = cfg.UNetConfig()
         assert config.from_dict(properties=def_u_net) == config
 
     def test_config_name(self):
-        unet_config = UNetConfig(
+        unet_config = cfg.UNetConfig(
             with_attention=True,
             without_reducing_filters=True,
             is_partial_reducing=False,

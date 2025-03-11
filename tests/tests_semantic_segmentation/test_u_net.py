@@ -4,24 +4,17 @@ import numpy as np
 import pytest
 import tensorflow as tf
 
-from tf_extensions.semantic_segmentation.configs import (
-    ConvolutionalBlockConfig,
-    UNetConfig,
-)
-from tf_extensions.semantic_segmentation.custom_layers import (
-    # UNetOutputLayer,
-    ConvolutionalBlock,
-    OutputSkippedConnections,
-)
+from tf_extensions.semantic_segmentation import configs as cfg
+from tf_extensions.semantic_segmentation import custom_layers as cl
 from tf_extensions.semantic_segmentation.u_net import UNet
 
 u_net_configs = [
-    UNetConfig(
+    cfg.UNetConfig(
         without_reducing_filters=combination[0][0],
         is_partial_reducing=combination[0][1],
         first_kernel_size=combination[1],
         max_filters_number=combination[2],
-        conv_block_config=ConvolutionalBlockConfig(with_bn=combination[3]),
+        conv_block_config=cfg.ConvolutionalBlockConfig(with_bn=combination[3]),
     )
     for combination in product(
         (
@@ -40,7 +33,7 @@ class TestUNet:
 
     def test_init_without_args(self):
         model = UNet()
-        assert isinstance(model.config, UNetConfig)
+        assert isinstance(model.config, cfg.UNetConfig)
 
     @pytest.mark.parametrize(
         ('filters', 'first_kernel_size'),
@@ -55,7 +48,7 @@ class TestUNet:
             match='Odd `first_kernel_size` is recommended.',
         ):
             UNet(
-                config=UNetConfig(
+                config=cfg.UNetConfig(
                     initial_filters_number=filters,
                     first_kernel_size=first_kernel_size,
                 ),
@@ -76,8 +69,8 @@ class TestUNet:
             assert isinstance(model.max_pools[i], tf.keras.layers.MaxPooling2D)
             assert model.max_pools[i].pool_size == (pooling, pooling)
             assert model.max_pools[i].padding == 'same'
-            assert isinstance(model.encoder_layers[i], ConvolutionalBlock)
-            assert isinstance(model.decoder_layers[i], ConvolutionalBlock)
+            assert isinstance(model.encoder_layers[i], cl.ConvolutionalBlock)
+            assert isinstance(model.decoder_layers[i], cl.ConvolutionalBlock)
             assert isinstance(
                 model.conv_transpose_layers[i],
                 tf.keras.layers.Conv2DTranspose,
@@ -87,10 +80,10 @@ class TestUNet:
         else:
             assert not len(model.decoder_bn_layers)
 
-        assert isinstance(model.middle_pair, ConvolutionalBlock)
+        assert isinstance(model.middle_pair, cl.ConvolutionalBlock)
         assert isinstance(
             model.output_skipped_connections,
-            OutputSkippedConnections,
+            cl.OutputSkippedConnections,
         )
         # assert isinstance(model.out_layer, UNetOutputLayer)
 

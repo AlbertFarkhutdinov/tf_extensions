@@ -2,30 +2,20 @@ import numpy as np
 import pytest
 import tensorflow as tf
 
-from tf_extensions.semantic_segmentation.configs import (
-    Conv2DConfig,
-    ConvolutionalBlockConfig,
-)
-from tf_extensions.semantic_segmentation.custom_layers import (
-    ASPPLayer,
-    ConvolutionalBlock,
-    MaxPoolingWithArgmax2D,
-    MaxUnpooling2D,
-    OutputSkippedConnections,
-    UNetOutputLayer,
-)
+from tf_extensions.semantic_segmentation import configs as cfg
+from tf_extensions.semantic_segmentation import custom_layers as cl
 
 
 class TestMaxPoolingWithArgmax2D:
 
     def test_init(self):
-        pooling_layer = MaxPoolingWithArgmax2D()
+        pooling_layer = cl.MaxPoolingWithArgmax2D()
         assert pooling_layer.pool_size == (2, 2)
         assert pooling_layer.strides == (2, 2)
         assert pooling_layer.padding == 'same'
 
     def test_compute_mask(self):
-        assert MaxPoolingWithArgmax2D().compute_mask(
+        assert cl.MaxPoolingWithArgmax2D().compute_mask(
             inputs=tf.random.normal(shape=(2, 128, 128, 1)),
         ) == [None, None]
 
@@ -37,7 +27,7 @@ class TestMaxPoolingWithArgmax2D:
         ],
     )
     def test_compute_output_shape(self, input_shape, expected):
-        assert MaxPoolingWithArgmax2D().compute_output_shape(
+        assert cl.MaxPoolingWithArgmax2D().compute_output_shape(
             input_shape=input_shape,
         ) == expected
 
@@ -71,7 +61,7 @@ class TestMaxPoolingWithArgmax2D:
         ],
     )
     def test_call(self, inputs, expected_values, expected_indices):
-        mp_values, mp_indices = MaxPoolingWithArgmax2D()(inputs=inputs)
+        mp_values, mp_indices = cl.MaxPoolingWithArgmax2D()(inputs=inputs)
         assert np.allclose(mp_values, expected_values)
         assert np.allclose(mp_indices, expected_indices)
 
@@ -79,7 +69,7 @@ class TestMaxPoolingWithArgmax2D:
 class TestMaxUnpooling2D:
 
     def test_init(self):
-        assert MaxUnpooling2D().pool_size == (2, 2)
+        assert cl.MaxUnpooling2D().pool_size == (2, 2)
 
     @pytest.mark.parametrize(
         ('input_shape', 'expected'),
@@ -88,7 +78,7 @@ class TestMaxUnpooling2D:
         ],
     )
     def test_compute_output_shape(self, input_shape, expected):
-        assert MaxUnpooling2D().compute_output_shape(
+        assert cl.MaxUnpooling2D().compute_output_shape(
             input_shape=input_shape,
         ) == expected
 
@@ -122,7 +112,7 @@ class TestMaxUnpooling2D:
         ],
     )
     def test_call(self, mp_values, mp_indices, expected):
-        unpooled = MaxUnpooling2D()(inputs=[mp_values, mp_indices])
+        unpooled = cl.MaxUnpooling2D()(inputs=[mp_values, mp_indices])
         assert np.allclose(unpooled, expected)
 
 
@@ -145,10 +135,10 @@ class TestConvolutionalBlock:
         with_dropout,
         activation,
     ):
-        block = ConvolutionalBlock(
+        block = cl.ConvolutionalBlock(
             filters=filters,
-            config=ConvolutionalBlockConfig(
-                conv2d_config=Conv2DConfig(),
+            config=cfg.ConvolutionalBlockConfig(
+                conv2d_config=cfg.Conv2DConfig(),
                 layers_number=layers_number,
                 activation=activation,
                 with_bn=with_bn,
@@ -237,10 +227,10 @@ class TestConvolutionalBlock:
         dropout,
         activation,
     ):
-        output = ConvolutionalBlock(
+        output = cl.ConvolutionalBlock(
             filters=filters,
-            config=ConvolutionalBlockConfig(
-                conv2d_config=Conv2DConfig(),
+            config=cfg.ConvolutionalBlockConfig(
+                conv2d_config=cfg.Conv2DConfig(),
                 layers_number=layers_number,
                 activation=activation,
                 with_bn=bn,
@@ -255,7 +245,7 @@ class TestASPPLayer:
     def test_init(self):
         filters_number = 2
         dilation_scale = 2
-        layer = ASPPLayer(
+        layer = cl.ASPPLayer(
             filters_number=filters_number,
             dilation_scale=dilation_scale,
         )
@@ -310,7 +300,7 @@ class TestASPPLayer:
         dil_number,
         expected_shape,
     ):
-        output = ASPPLayer(
+        output = cl.ASPPLayer(
             filters_number=filters,
             kernel_size=kernel_size,
             dilation_scale=dil_scale,
@@ -332,20 +322,20 @@ class TestOutputSkippedConnections:
             (16, None, 3, True),
             (16, None, 3, False),
             (16, None, 0, True),
-            (16, ConvolutionalBlockConfig(), 3, True),
-            (16, ConvolutionalBlockConfig(), 3, False),
-            (16, ConvolutionalBlockConfig(), 0, True),
+            (16, cfg.ConvolutionalBlockConfig(), 3, True),
+            (16, cfg.ConvolutionalBlockConfig(), 3, False),
+            (16, cfg.ConvolutionalBlockConfig(), 0, True),
         ],
     )
     def test_init(self, filters, config, is_skipped_concat, blocks_number):
-        layer = OutputSkippedConnections(
+        layer = cl.OutputSkippedConnections(
             filters=filters,
             config=config,
             is_skipped_with_concat=is_skipped_concat,
             blocks_number=blocks_number,
         )
         assert layer.filters == filters
-        assert isinstance(layer.config, ConvolutionalBlockConfig)
+        assert isinstance(layer.config, cfg.ConvolutionalBlockConfig)
         assert layer.is_skipped_with_concat == is_skipped_concat
         assert layer.blocks_number == blocks_number
         assert len(layer.conv_layers) == layer.blocks_number
@@ -368,7 +358,7 @@ class TestOutputSkippedConnections:
             (
                 (3, 128, 128, 16),
                 16,
-                ConvolutionalBlockConfig(),
+                cfg.ConvolutionalBlockConfig(),
                 2,
                 True,
                 (3, 128, 128, 48),
@@ -376,7 +366,7 @@ class TestOutputSkippedConnections:
             (
                 (3, 128, 128, 16),
                 16,
-                ConvolutionalBlockConfig(),
+                cfg.ConvolutionalBlockConfig(),
                 2,
                 False,
                 (3, 128, 128, 16),
@@ -384,7 +374,7 @@ class TestOutputSkippedConnections:
             (
                 (3, 128, 128, 16),
                 16,
-                ConvolutionalBlockConfig(),
+                cfg.ConvolutionalBlockConfig(),
                 0,
                 True,
                 (3, 128, 128, 16),
@@ -400,7 +390,7 @@ class TestOutputSkippedConnections:
         blocks_number,
         exp_shape,
     ):
-        output = OutputSkippedConnections(
+        output = cl.OutputSkippedConnections(
             filters=filters,
             config=config,
             is_skipped_with_concat=is_skipped_concat,
@@ -418,18 +408,18 @@ class TestUNetOutputLayer:
         ),
         [
             (None, None),
-            (None, Conv2DConfig()),
+            (None, cfg.Conv2DConfig()),
             (2, None),
-            (2, Conv2DConfig()),
+            (2, cfg.Conv2DConfig()),
         ],
     )
     def test_init(self, vector_length, conv2d_config):
-        layer = UNetOutputLayer(
+        layer = cl.UNetOutputLayer(
             vector_length=vector_length,
             conv2d_config=conv2d_config,
         )
         assert layer.vector_length == vector_length
-        assert isinstance(layer.conv2d_config, Conv2DConfig)
+        assert isinstance(layer.conv2d_config, cfg.Conv2DConfig)
         if layer.vector_length:
             assert isinstance(layer.out_layer, tf.keras.layers.Conv1D)
         else:
@@ -444,13 +434,13 @@ class TestUNetOutputLayer:
         ),
         [
             ((3, 128, 128, 1), None, None, (3, 128, 128, 1)),
-            ((3, 128, 128, 1), None, Conv2DConfig(), (3, 128, 128, 1)),
+            ((3, 128, 128, 1), None, cfg.Conv2DConfig(), (3, 128, 128, 1)),
             ((3, 128, 128, 1), 2, None, (3, 128, 1, 1)),
-            ((3, 128, 128, 1), 2, Conv2DConfig(), (3, 128, 1, 1)),
+            ((3, 128, 128, 1), 2, cfg.Conv2DConfig(), (3, 128, 1, 1)),
         ],
     )
     def test_call(self, input_shape, vector_length, conv2d_config, exp_shape):
-        output = UNetOutputLayer(
+        output = cl.UNetOutputLayer(
             vector_length=vector_length,
             conv2d_config=conv2d_config,
         )(inputs=np.random.random(input_shape))

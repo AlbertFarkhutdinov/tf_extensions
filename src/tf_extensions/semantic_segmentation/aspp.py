@@ -4,8 +4,7 @@ from typing import Optional, Union
 import tensorflow as tf
 
 from tf_extensions.semantic_segmentation.custom_layers import ASPPLayer
-from tf_extensions.semantic_segmentation.custom_net import \
-    CustomSegmentationNet
+from tf_extensions.semantic_segmentation.custom_net import CustomSegmentationNet
 
 DEFAULT_MIDDLE_FILTERS = 48
 DEFAULT_ASPP_FILTERS = 256

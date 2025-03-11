@@ -1,11 +1,7 @@
 import pytest
 
-from tf_extensions.custom_losses.adaptive_nmae import AdaptiveNMAE
-from tf_extensions.custom_losses.custom_loss import (
-    CustomLoss,
-    CustomLossConfig,
-)
-from tf_extensions.custom_losses.ms_dssim import MultiScaleDSSIM
+from tf_extensions import custom_losses as cl
+from tf_extensions.custom_losses.custom_loss import CustomLossConfig
 
 
 class TestCustomLossConfig:
@@ -23,9 +19,9 @@ class TestCustomLoss:
     """Class for the CustomLoss tests."""
 
     def test_default_init(self) -> None:
-        loss = CustomLoss()
-        default_nmae = AdaptiveNMAE()
-        default_ms_sim = MultiScaleDSSIM()
+        loss = cl.CustomLoss()
+        default_nmae = cl.AdaptiveNMAE()
+        default_ms_sim = cl.MultiScaleDSSIM()
         assert loss.config.name == 'custom_loss'
         assert loss.config.ssim_weight == 0.85
         assert type(loss.adaptive_nmae) is type(default_nmae)
@@ -34,9 +30,9 @@ class TestCustomLoss:
         assert loss.ms_dssim.get_config() == default_ms_sim.get_config()
 
     def test_init_from_losses(self) -> None:
-        default_nmae = AdaptiveNMAE()
-        default_ms_sim = MultiScaleDSSIM()
-        loss = CustomLoss(
+        default_nmae = cl.AdaptiveNMAE()
+        default_ms_sim = cl.MultiScaleDSSIM()
+        loss = cl.CustomLoss(
             adaptive_nmae=default_nmae,
             ms_dssim=default_ms_sim,
         )
@@ -48,9 +44,9 @@ class TestCustomLoss:
         assert loss.ms_dssim.get_config() == default_ms_sim.get_config()
 
     def test_init_from_configs(self) -> None:
-        default_nmae = AdaptiveNMAE()
-        default_ms_sim = MultiScaleDSSIM()
-        loss = CustomLoss(
+        default_nmae = cl.AdaptiveNMAE()
+        default_ms_sim = cl.MultiScaleDSSIM()
+        loss = cl.CustomLoss(
             adaptive_nmae=default_nmae.get_config(),
             ms_dssim=default_ms_sim.get_config(),
         )
@@ -62,9 +58,9 @@ class TestCustomLoss:
         assert loss.ms_dssim.get_config() == default_ms_sim.get_config()
 
     def test_default_get_config(self) -> None:
-        loss = CustomLoss()
-        default_nmae = AdaptiveNMAE()
-        default_ms_sim = MultiScaleDSSIM()
+        loss = cl.CustomLoss()
+        default_nmae = cl.AdaptiveNMAE()
+        default_ms_sim = cl.MultiScaleDSSIM()
         assert loss.get_config() == {
             'reduction': 'none',
             'dtype': 'float32',

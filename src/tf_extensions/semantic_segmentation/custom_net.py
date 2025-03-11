@@ -2,15 +2,11 @@
 from copy import deepcopy
 from typing import Optional, Union
 
-import numpy as np
-import pandas as pd
 import tensorflow as tf
 from IPython import display
 
 from tf_extensions.semantic_segmentation import configs as cfg
-from tf_extensions.semantic_segmentation.custom_fitter import CustomFitter
-from tf_extensions.semantic_segmentation.custom_layers import \
-    ConvolutionalBlock
+from tf_extensions.semantic_segmentation.custom_layers import ConvolutionalBlock
 
 
 class CustomSegmentationNet(tf.keras.Model):
@@ -158,51 +154,3 @@ class CustomSegmentationNet(tf.keras.Model):
             filters=filters,
             config=config,
         )
-
-    def fit_custom(
-        self,
-        *dirs,
-        samples: np.ndarray,
-        labels: np.ndarray,
-        with_early_stopping: bool = False,
-        loaded_epoch: int = None,
-        **fitting_kwargs,
-    ) -> tuple[tf.keras.Model, pd.DataFrame]:
-        """
-        Train the segmentation model or load the previously trained one.
-
-        Parameters
-        ----------
-        dirs :
-            Directories related to model training (e.g., checkpoints, logs).
-        samples : np.ndarray
-            Training samples.
-        labels : np.ndarray
-            Corresponding labels for training samples.
-        with_early_stopping : bool, optional, default: False
-            Whether to use early stopping during training.
-        loaded_epoch : int, optional
-            The epoch number of a previously saved model to load it.
-
-        Returns
-        -------
-        tuple
-            - The trained model : tf.keras.Model
-            - The training history : pd.DataFrame
-
-        """
-        fitter = CustomFitter(*dirs, model=self)
-        loaded_model, fitting_history = fitter.load_model(
-            loaded_epoch=loaded_epoch,
-        )
-        if loaded_model is None:
-            model, fitting_history = fitter.fit_model(
-                model=self,
-                samples=samples,
-                labels=labels,
-                with_early_stopping=with_early_stopping,
-                **fitting_kwargs,
-            )
-        else:
-            model = loaded_model
-        return model, fitting_history

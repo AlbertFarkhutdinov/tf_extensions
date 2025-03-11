@@ -1,10 +1,8 @@
 import pytest
 import tensorflow as tf
 
-from tf_extensions.custom_losses.ms_dssim import (
-    MultiScaleDSSIM,
-    MultiScaleDSSIMConfig,
-)
+from tf_extensions import custom_losses as cl
+from tf_extensions.custom_losses.ms_dssim import MultiScaleDSSIMConfig
 
 default_config = {
     'reduction': 'none',
@@ -45,7 +43,7 @@ class TestMultiScaleSSIM:
     """Class for the MultiScaleSSIM tests."""
 
     def test_default_init(self) -> None:
-        loss = MultiScaleDSSIM()
+        loss = cl.MultiScaleDSSIM()
         assert loss.config.name == 'ms_dssim'
         assert loss.config.max_val == 2
         assert loss.config.filter_size == 5
@@ -65,11 +63,11 @@ class TestMultiScaleSSIM:
         assert loss.config.pool_kernel == 2
 
     def test_default_get_config(self) -> None:
-        loss = MultiScaleDSSIM()
+        loss = cl.MultiScaleDSSIM()
         assert loss.get_config() == default_config
 
     def test_default_from_config(self) -> None:
-        loss = MultiScaleDSSIM.from_config(non_default_config)
+        loss = cl.MultiScaleDSSIM.from_config(non_default_config)
         for attr_name, attr_value in loss.get_config().items():
             if attr_name in non_default_config:
                 assert attr_value == non_default_config[attr_name]
@@ -90,7 +88,7 @@ class TestMultiScaleSSIM:
         max_val: int,
     ) -> None:
         shape = (5, 128, 128, 3)
-        loss = MultiScaleDSSIM(
+        loss = cl.MultiScaleDSSIM(
             dtype=dtype,
             max_val=max_val,
         )(
@@ -120,7 +118,7 @@ class TestMultiScaleSSIM:
         max_val: int,
         expected_shape: tuple[int, ...],
     ) -> None:
-        loss = MultiScaleDSSIM(
+        loss = cl.MultiScaleDSSIM(
             max_val=max_val,
             with_batches_averaging=with_batches_averaging,
         )(
@@ -143,7 +141,7 @@ class TestMultiScaleSSIM:
         shape: tuple[int, ...],
         filter_size: int,
     ) -> None:
-        loss = MultiScaleDSSIM(
+        loss = cl.MultiScaleDSSIM(
             max_val=2,
             filter_size=filter_size,
         )
@@ -172,7 +170,7 @@ class TestMultiScaleSSIM:
         pred_shape: tuple[int, ...],
         filter_size: int,
     ) -> None:
-        loss = MultiScaleDSSIM(
+        loss = cl.MultiScaleDSSIM(
             max_val=2,
             filter_size=filter_size,
         )

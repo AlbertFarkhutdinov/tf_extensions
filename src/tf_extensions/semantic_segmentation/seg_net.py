@@ -6,8 +6,7 @@ import tensorflow as tf
 
 from tf_extensions.semantic_segmentation import custom_layers as cl
 from tf_extensions.semantic_segmentation.configs import SegNetConfig
-from tf_extensions.semantic_segmentation.custom_net import \
-    CustomSegmentationNet
+from tf_extensions.semantic_segmentation.custom_net import CustomSegmentationNet
 
 
 class SegNet(CustomSegmentationNet):
