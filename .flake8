@@ -2,5 +2,5 @@
 docstring-convention=numpy
 extend-ignore=ANN101,ANN102,ANN002,ANN003,WPS410,WPS412
 per-file-ignores =
-    custom_logging/*_handler.py:WPS323
+    layers/__init__.py:I001
     tests/*.py:S101
