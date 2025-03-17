@@ -27,6 +27,7 @@ dev = [
     "flake8-annotations<3.2",
     "flake8-awesome<1.4",
     "pytest-cov<6.1",
+    "ruff<0.12",
     "wemake-python-styleguide<1.0",
 ]
 
