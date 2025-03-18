@@ -1,3 +1,4 @@
+"""The package contains custom Tensorflow layers."""
 from tf_extensions.layers.aspp_layer import ASPPLayer
 from tf_extensions.layers.attention_gating_block import AttentionGatingBlock
 from tf_extensions.layers.convolutional_block import ConvolutionalBlock

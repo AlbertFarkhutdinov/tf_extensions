@@ -65,9 +65,9 @@ class SkippedConnections(tf.keras.layers.Layer):
         ----------
         inputs : tf.Tensor
             The input tensor.
-        training : bool or tf.Tensor, optional
+        training : TrainingType
             Whether the layer should behave in training mode or inference mode.
-        mask : tf.Tensor or list of tf.Tensor, optional
+        mask : MaskType
             Mask tensor(s) for input data.
 
         Returns
