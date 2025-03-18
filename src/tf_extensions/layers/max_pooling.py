@@ -1,15 +1,17 @@
+"""The module contains 2D Max Pooling layer with Argmax output."""
+from dataclasses import dataclass
 from typing import Union
 
 import tensorflow as tf
 
+from tf_extensions.auxiliary.base_config import BaseConfig
+from tf_extensions.layers.base_layer import BaseLayer
 
-class MaxPoolingWithArgmax2D(tf.keras.layers.Layer):
+
+@dataclass
+class MaxPoolingConfig(BaseConfig):
     """
-    2D Max Pooling layer with Argmax output.
-
-    This layer performs max pooling
-    and also returns the indices of the max values,
-    which can be useful for operations like unpooling.
+    Config of 2D Max Pooling layer with Argmax output.
 
     Parameters
     ----------
@@ -22,19 +24,27 @@ class MaxPoolingWithArgmax2D(tf.keras.layers.Layer):
 
     """
 
-    def __init__(
-        self,
-        pool_size: tuple[int, ...] = (2, 2),
-        strides: tuple[int, ...] = (2, 2),
-        padding: str = 'same',
-        *args,
-        **kwargs,
-    ) -> None:
-        """Initialize self. See help(type(self)) for accurate signature."""
-        super().__init__(*args, **kwargs)
-        self.padding = padding
-        self.pool_size = pool_size
-        self.strides = strides
+    pool_size: tuple[int, ...] = (2, 2)
+    strides: tuple[int, ...] = (2, 2)
+    padding: str = 'same'
+
+
+class MaxPoolingWithArgmax2D(BaseLayer):
+    """
+    2D Max Pooling layer with Argmax output.
+
+    This layer performs max pooling
+    and also returns the indices of the max values,
+    which can be useful for operations like unpooling.
+
+    Attributes
+    ----------
+    config: MaxPoolingConfig
+        Config of MaxPoolingWithArgmax2D.
+
+    """
+
+    config_type = MaxPoolingConfig
 
     def call(
         self,
@@ -59,9 +69,9 @@ class MaxPoolingWithArgmax2D(tf.keras.layers.Layer):
         """
         output, argmax = tf.nn.max_pool_with_argmax(
             input=inputs,
-            ksize=[1, self.pool_size[0], self.pool_size[1], 1],
-            strides=[1, self.strides[0], self.strides[1], 1],
-            padding=self.padding.upper(),
+            ksize=[1, *self.config.pool_size[:2], 1],
+            strides=[1, *self.config.strides[:2], 1],
+            padding=self.config.padding.upper(),
         )
         argmax = tf.cast(argmax, 'int32')
         return output, argmax

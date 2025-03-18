@@ -1,12 +1,16 @@
+"""The module contains Attention Gating Block."""
+from dataclasses import dataclass
+
 import tensorflow as tf
 
+from tf_extensions.auxiliary.base_config import BaseConfig
+from tf_extensions.layers.base_layer import BaseLayer
 
-class AttentionGatingBlock(tf.keras.layers.Layer):
+
+@dataclass
+class AttentionGatingBlockConfig(BaseConfig):
     """
-    Attention Gating Block for enhancing feature selection.
-
-    This layer implements an attention mechanism
-    that refines feature maps using gating signals.
+    Config of Attention Gating Block for enhancing feature selection.
 
     Parameters
     ----------
@@ -17,35 +21,52 @@ class AttentionGatingBlock(tf.keras.layers.Layer):
 
     """
 
-    def __init__(
-        self,
-        filters: int,
-        activation: str = 'relu',
-        *args,
-        **kwargs,
-    ) -> None:
+    filters: int
+    activation: str = 'relu'
+
+
+class AttentionGatingBlock(BaseLayer):
+    """
+    Attention Gating Block for enhancing feature selection.
+
+    This layer implements an attention mechanism
+    that refines feature maps using gating signals.
+
+    Attributes
+    ----------
+    config: AttentionGatingBlockConfig
+        Config of Attention Gating Block.
+
+    """
+
+    config_type = AttentionGatingBlockConfig
+
+    def __init__(self, **kwargs) -> None:
         """Initialize self. See help(type(self)) for accurate signature."""
-        super().__init__(*args, **kwargs)
-        self.filters = filters
+        super().__init__(**kwargs)
         conv_kwargs = {'padding': 'same'}
         self.conv_prev = tf.keras.layers.Conv2D(
-            filters=self.filters,
+            filters=self.config.filters,
             kernel_size=(1, 1),
             **conv_kwargs,
         )
         self.conv_skipped = tf.keras.layers.Conv2D(
-            filters=self.filters,
+            filters=self.config.filters,
             kernel_size=(2, 2),
             strides=(2, 2),
             **conv_kwargs,
         )
-        self.activation1 = tf.keras.layers.Activation(activation)
+        self.activations = [
+            tf.keras.layers.Activation(
+                activation=self.config.activation,
+            ),
+            tf.keras.layers.Activation('sigmoid'),
+        ]
         self.out_layer = tf.keras.layers.Conv2D(
             filters=1,
             kernel_size=(1, 1),
             **conv_kwargs,
         )
-        self.activation2 = tf.keras.layers.Activation('sigmoid')
         self.up_layer = tf.keras.layers.UpSampling2D(size=(2, 2))
         self.bn = tf.keras.layers.BatchNormalization()
 
@@ -70,7 +91,7 @@ class AttentionGatingBlock(tf.keras.layers.Layer):
         theta_skipped = self.conv_skipped(skipped)
         phi_prev = self.conv_prev(previous)
         out = tf.keras.layers.add([phi_prev, theta_skipped])
-        out = self.activation1(out)
+        out = self.activations[0](out)
         out = self.out_layer(out)
-        out = self.activation2(out)
+        out = self.activations[1](out)
         return self.up_layer(out)
