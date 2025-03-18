@@ -110,7 +110,7 @@ class BaseConfig:
 
         Parameters
         ----------
-        cls_field : dataclasses.Field
+        cls_field : Field
             A field of the config.
         properties : dict
             A dictionary containing the properties to set on the instance.
