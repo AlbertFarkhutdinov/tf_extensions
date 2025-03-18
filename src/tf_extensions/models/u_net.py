@@ -1,6 +1,5 @@
 """The module provides the U-Net network."""
 from dataclasses import dataclass
-from typing import Union
 
 import numpy as np
 import tensorflow as tf
@@ -351,7 +350,7 @@ class UNet(BaseNet):
     def _get_attention_gate(
         self,
         filter_scale: int,
-    ) -> Union[cl.AttentionGate, cl.AttentionGatingBlock]:
+    ) -> cl.AttentionGatingBlock:
         """
         Return Attention Gating Block.
 

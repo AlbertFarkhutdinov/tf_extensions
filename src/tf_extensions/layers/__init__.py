@@ -1,5 +1,4 @@
 from tf_extensions.layers.aspp_layer import ASPPLayer
-from tf_extensions.layers.attention_gate import AttentionGate
 from tf_extensions.layers.attention_gating_block import AttentionGatingBlock
 from tf_extensions.layers.convolutional_block import ConvolutionalBlock
 from tf_extensions.layers.gating import GatingSignal
@@ -10,7 +9,6 @@ from tf_extensions.layers.u_net_output import UNetOutputLayer
 
 __all__ = [
     'ASPPLayer',
-    'AttentionGate',
     'AttentionGatingBlock',
     'ConvolutionalBlock',
     'GatingSignal',
