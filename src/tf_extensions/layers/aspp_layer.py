@@ -1,13 +1,16 @@
+"""The module contains Atrous Spatial Pyramid Pooling (ASPP) layer."""
+from dataclasses import dataclass
+
 import tensorflow as tf
 
+from tf_extensions.auxiliary.base_config import BaseConfig
+from tf_extensions.layers.base_layer import BaseLayer
 
-class ASPPLayer(tf.keras.layers.Layer):
+
+@dataclass
+class ASPPLayerConfig(BaseConfig):
     """
-    Atrous Spatial Pyramid Pooling (ASPP) layer for semantic segmentation.
-
-    This layer applies multiple parallel dilated convolutions
-    with different dilation rates to capture multiscale context information
-    and then concatenates the outputs.
+    Config of Atrous Spatial Pyramid Pooling (ASPP) layer.
 
     Parameters
     ----------
@@ -15,37 +18,54 @@ class ASPPLayer(tf.keras.layers.Layer):
         Number of filters in each convolutional layer.
     dilation_scale : int
         Base scale factor for dilation rates.
-    dilation_number : int, optional, default: 3
-        Number of dilated convolutional layers (excluding the 1x1 convolution).
+    dilation_number : int
+        Number of dilated convolutional layers
+        (excluding the 1x1 convolution).
     kernel_size : tuple of int, optional, default: (3, 3)
         Kernel size for the dilated convolutional layers.
 
     """
 
-    def __init__(
-        self,
-        filters_number: int,
-        dilation_scale: int,
-        dilation_number: int = 3,
-        kernel_size: tuple[int, ...] = (3, 3),
-        *args,
-        **kwargs,
-    ) -> None:
+    filters_number: int
+    dilation_scale: int
+    dilation_number: int = 3
+    kernel_size: tuple[int, ...] = (3, 3)
+
+
+class ASPPLayer(BaseLayer):
+    """
+    Atrous Spatial Pyramid Pooling (ASPP) layer.
+
+    This layer applies multiple parallel dilated convolutions
+    with different dilation rates to capture multiscale context information
+    and then concatenates the outputs.
+
+    Attributes
+    ----------
+    config: ASPPLayerConfig
+        Config of Atrous Spatial Pyramid Pooling (ASPP) layer.
+
+    """
+
+    config_type = ASPPLayerConfig
+
+    def __init__(self, **kwargs) -> None:
         """Initialize self. See help(type(self)) for accurate signature."""
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.conv_kwargs = {
-            'filters': filters_number,
+            'filters': self.config.filters_number,
             'padding': 'same',
             'activation': 'relu',
         }
         self.dilated_layers = [
             tf.keras.layers.Conv2D(kernel_size=(1, 1), **self.conv_kwargs),
         ]
-        for dilation_id in range(dilation_number):
+        for dilation_id in range(self.config.dilation_number):
+            dilation_rate = self.config.dilation_scale * (dilation_id + 1)
             self.dilated_layers.append(
                 tf.keras.layers.Conv2D(
-                    kernel_size=kernel_size,
-                    dilation_rate=dilation_scale * (dilation_id + 1),
+                    kernel_size=self.config.kernel_size,
+                    dilation_rate=dilation_rate,
                     **self.conv_kwargs,
                 ),
             )
