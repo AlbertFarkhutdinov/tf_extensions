@@ -37,11 +37,11 @@ class TestSkippedConnections:
             is_skipped_with_concat=is_skipped_concat,
             blocks_number=blocks_number,
         )
-        assert layer.filters == filters
-        assert isinstance(layer.config, cc.ConvolutionalBlockConfig)
-        assert layer.is_skipped_with_concat == is_skipped_concat
-        assert layer.blocks_number == blocks_number
-        assert len(layer.conv_layers) == layer.blocks_number
+        assert layer.config.filters == filters
+        assert isinstance(layer.config.config, cc.ConvolutionalBlockConfig)
+        assert layer.config.is_skipped_with_concat == is_skipped_concat
+        assert layer.config.blocks_number == blocks_number
+        assert len(layer.conv_layers) == layer.config.blocks_number
         for conv_layer in layer.conv_layers:
             assert isinstance(conv_layer, tf.keras.layers.Conv2D)
 

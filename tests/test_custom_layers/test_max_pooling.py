@@ -9,9 +9,9 @@ class TestMaxPoolingWithArgmax2D:
 
     def test_init(self) -> None:
         pooling_layer = MaxPoolingWithArgmax2D()
-        assert pooling_layer.pool_size == (2, 2)
-        assert pooling_layer.strides == (2, 2)
-        assert pooling_layer.padding == 'same'
+        assert pooling_layer.config.pool_size == (2, 2)
+        assert pooling_layer.config.strides == (2, 2)
+        assert pooling_layer.config.padding == 'same'
 
     def test_compute_mask(self) -> None:
         assert MaxPoolingWithArgmax2D().compute_mask(

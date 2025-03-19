@@ -8,7 +8,7 @@ from tf_extensions.layers import MaxUnpooling2D
 class TestMaxUnpooling2D:
 
     def test_init(self) -> None:
-        assert MaxUnpooling2D().pool_size == (2, 2)
+        assert MaxUnpooling2D().config.pool_size == (2, 2)
 
     @pytest.mark.parametrize(
         ('input_shape', 'expected'),
