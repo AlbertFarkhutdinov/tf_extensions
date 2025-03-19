@@ -1,3 +1,14 @@
+"""
+Module providing a base class for custom loss functions in TensorFlow/Keras.
+
+Classes
+-------
+BaseLossConfig
+    Configuration class for `BaseLoss`.
+BaseLoss
+    Base class for implementing custom TensorFlow/Keras loss functions.
+
+"""
 from dataclasses import dataclass
 from typing import Any, Type, TypeVar, Union
 
@@ -9,6 +20,22 @@ from tf_extensions.auxiliary.base_config import BaseConfig
 
 @dataclass
 class BaseLossConfig(BaseConfig):
+    """
+    Configuration class for `BaseLoss`.
+
+    Attributes
+    ----------
+    reduction : tf.keras.losses.Reduction, default: `Reduction.NONE`
+        A reduction method for computing loss.
+    name : str, optional
+        Name of the loss function.
+    dtype : str, default: 'float32'
+        Data type of tf.Tensor.
+    is_normalized : bool
+        Whether to normalize input images before computing loss.
+
+    """
+
     reduction: tf.keras.losses.Reduction = tf.keras.losses.Reduction.NONE
     name: str = None
     dtype: str = 'float32'
@@ -19,11 +46,20 @@ BaseLossInstance = TypeVar('BaseLossInstance', bound='BaseLoss')
 
 
 class BaseLoss(tf.keras.losses.Loss):
-    """Class for the CustomLoss."""
+    """
+    Base class for custom loss functions in TensorFlow/Keras.
+
+    Attributes
+    ----------
+    config : BaseLossConfig
+        Configuration settings for the loss function.
+
+    """
 
     config_type = BaseLossConfig
 
     def __init__(self, **kwargs) -> None:
+        """Initialize self. See help(type(self)) for accurate signature."""
         self.config = self.__class__.config_type.from_kwargs(**kwargs)
         super().__init__(
             name=self.config.name,
@@ -36,24 +72,33 @@ class BaseLoss(tf.keras.losses.Loss):
         y_pred: tf.Tensor,
     ) -> tf.Tensor:
         """
-        Invoke the `Loss` instance.
+        Return the loss values.
 
         Parameters
         ----------
-        y_true : array-like
-            Ground truth values with shape `[batch_size, d0, ..., dN]`.
-        y_pred : array-like
-            Predicted values shape `[batch_size, d0, ..., dN]`.
+        y_true : tf.Tensor
+            Ground truth values, shape [batch_size, d0, ..., dN].
+        y_pred : tf.Tensor
+            Predicted values, shape [batch_size, d0, ..., dN].
 
-        Returns
-        -------
-        tf.Tensor
-            The loss function value.
+        Raises
+        ------
+        NotImplementedError
+            If this method is not implemented.
 
         """
         raise NotImplementedError()  # pragma: no cover
 
     def get_config(self) -> dict[str, Any]:  # noqa: WPS615
+        """
+        Return the configuration dictionary for serialization.
+
+        Returns
+        -------
+        dict
+            Configuration dictionary containing loss parameters.
+
+        """
         config = super().get_config()
         config['cls_name'] = self.__class__.__name__
         config.update(self.config.as_dict())
@@ -67,12 +112,42 @@ class BaseLoss(tf.keras.losses.Loss):
         y_true: tf.Tensor,
         y_pred: tf.Tensor,
     ) -> tuple[tf.Tensor, tf.Tensor]:
+        """
+        Cast input tensors to the required data type.
+
+        Parameters
+        ----------
+        y_true : tf.Tensor
+            Ground truth values.
+        y_pred : tf.Tensor
+            Predicted values.
+
+        Returns
+        -------
+        tuple of tf.Tensor
+            Tensors cast to the required data type.
+
+        """
         y_true = tf.cast(y_true, dtype=self.config.dtype)
         y_pred = tf.cast(y_pred, dtype=self.config.dtype)
         return y_true, y_pred
 
     @classmethod
     def from_config(cls, config: dict[str, Any]) -> BaseLossInstance:
+        """
+        Create a loss instance from a configuration dictionary.
+
+        Parameters
+        ----------
+        config : dict
+            Configuration dictionary.
+
+        Returns
+        -------
+        BaseLossInstance
+            New instance of `BaseLoss`.
+
+        """
         loss_config = {}
         for attr_name, attr_value in config.items():
             try:
@@ -86,6 +161,22 @@ class BaseLoss(tf.keras.losses.Loss):
         config: Union[BaseLossInstance, dict[str, Any], None],
         loss_cls: Type[BaseLossInstance],
     ) -> BaseLossInstance:
+        """
+        Return or create a loss instance from the given configuration.
+
+        Parameters
+        ----------
+        config : BaseLossInstance or dict, optional
+            Loss instance or configuration dictionary.
+        loss_cls : Type[BaseLossInstance]
+            Loss class type.
+
+        Returns
+        -------
+        BaseLossInstance
+            Initialized loss instance.
+
+        """
         if isinstance(config, dict):
             return loss_cls.from_config(config)
         if config is not None:
@@ -97,6 +188,22 @@ class BaseLoss(tf.keras.losses.Loss):
         y_true: tf.Tensor,
         y_pred: tf.Tensor,
     ) -> tuple[tf.Tensor, tf.Tensor]:
+        """
+        Normalize images before loss computation if required.
+
+        Parameters
+        ----------
+        y_true : tf.Tensor
+            Ground truth values.
+        y_pred : tf.Tensor
+            Predicted values.
+
+        Returns
+        -------
+        tuple of tf.Tensor
+            Normalized tensors.
+
+        """
         if not self.config.is_normalized:
             return y_true, y_pred
         mean_axis = tf.range(
