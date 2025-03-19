@@ -99,19 +99,18 @@ class BaseLoss(tf.keras.losses.Loss):
     ) -> tuple[tf.Tensor, tf.Tensor]:
         if not self.config.is_normalized:
             return y_true, y_pred
-        ndim = kb.ndim(y_true)
         mean_axis = tf.range(
             start=1,
-            limit=ndim,
+            limit=kb.ndim(y_true),
         )
-        mean_abs_true = kb.mean(
+        batch_scales = kb.max(
             tf.abs(y_true),
             axis=mean_axis,
         )
         norm_coefficient = kb.switch(
-            mean_abs_true != 0,
-            mean_abs_true,
-            kb.ones_like(mean_abs_true),
+            batch_scales != 0,
+            batch_scales,
+            kb.ones_like(batch_scales),
         )
         shape = (-1, 1, 1, 1)
         norm_coefficient = tf.reshape(
