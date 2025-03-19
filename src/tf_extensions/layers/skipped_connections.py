@@ -1,15 +1,18 @@
+"""The module contains a block of skipped connections."""
+from dataclasses import dataclass
+
 import tensorflow as tf
 
+from tf_extensions.auxiliary.base_config import BaseConfig
 from tf_extensions.auxiliary.custom_types import MaskType, TrainingType
+from tf_extensions.layers.base_layer import BaseLayer
 from tf_extensions.layers.conv_configs import ConvolutionalBlockConfig
 
 
-class SkippedConnections(tf.keras.layers.Layer):
+@dataclass
+class SkippedConnectionsConfig(BaseConfig):
     """
-    A block of multiple convolutions with skipped connections.
-
-    Output of each convolution block is added with skipped connection
-    or concatenates with it.
+    Config of a block of multiple convolutions with skipped connections.
 
     Parameters
     ----------
@@ -26,30 +29,43 @@ class SkippedConnections(tf.keras.layers.Layer):
 
     """
 
-    def __init__(
-        self,
-        filters: int,
-        config: ConvolutionalBlockConfig = None,
-        is_skipped_with_concat: bool = True,
-        blocks_number: int = 0,
-        **kwargs,
-    ) -> None:
+    filters: int
+    config: ConvolutionalBlockConfig = None
+    is_skipped_with_concat: bool = True
+    blocks_number: int = 0
+
+    def __post_init__(self) -> None:
+        """Update config properties after initialization."""
+        if self.config is None:
+            self.config = ConvolutionalBlockConfig()  # noqa: WPS601
+
+
+class SkippedConnections(BaseLayer):
+    """
+    A block of multiple convolutions with skipped connections.
+
+    Output of each convolution block is added with skipped connection
+    or concatenates with it.
+
+    Attributes
+    ----------
+    config: SkippedConnectionsConfig
+        Config of SkippedConnections.
+
+    """
+
+    config_type = SkippedConnectionsConfig
+
+    def __init__(self, **kwargs) -> None:
         """Initialize self. See help(type(self)) for accurate signature."""
         super().__init__(**kwargs)
-        self.filters = filters
-        if config:
-            self.config = config
-        else:
-            self.config = ConvolutionalBlockConfig()
-        self.is_skipped_with_concat = is_skipped_with_concat
-        self.blocks_number = blocks_number
         self.conv_layers = [
             tf.keras.layers.Conv2D(
-                filters=self.filters,
+                filters=self.config.filters,
                 activation=None,
                 **self.config.conv2d_config.as_dict(),
             )
-            for _ in range(self.blocks_number)
+            for _ in range(self.config.blocks_number)
         ]
 
     def call(
@@ -79,7 +95,7 @@ class SkippedConnections(tf.keras.layers.Layer):
         outs = [inputs]
         for layer in self.conv_layers:
             out = layer(outs[-1])
-            if self.is_skipped_with_concat:
+            if self.config.is_skipped_with_concat:
                 out = tf.concat([outs[-1], out], axis=-1)
             else:
                 out = tf.reduce_sum(input_tensor=[outs[-1], out], axis=0)

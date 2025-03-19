@@ -1,14 +1,17 @@
+"""The module contains 2D Max Unpooling layer with Argmax input."""
+from dataclasses import dataclass
+
 import numpy as np
 import tensorflow as tf
 
+from tf_extensions.auxiliary.base_config import BaseConfig
+from tf_extensions.layers.base_layer import BaseLayer
 
-class MaxUnpooling2D(tf.keras.layers.Layer):
+
+@dataclass
+class MaxUnPoolingConfig(BaseConfig):
     """
-    2D Max Unpooling layer for reconstructing feature maps.
-
-    This layer performs the inverse operation of max pooling
-    by placing pooled values back into their original positions
-    using the provided indices.
+    Config of 2D Max Unpooling layer with Argmax input.
 
     Parameters
     ----------
@@ -17,15 +20,25 @@ class MaxUnpooling2D(tf.keras.layers.Layer):
 
     """
 
-    def __init__(
-        self,
-        pool_size: tuple[int, ...] = (2, 2),
-        *args,
-        **kwargs,
-    ) -> None:
-        """Initialize self. See help(type(self)) for accurate signature."""
-        super().__init__(*args, **kwargs)
-        self.pool_size = pool_size
+    pool_size: tuple[int, ...] = (2, 2)
+
+
+class MaxUnpooling2D(BaseLayer):
+    """
+    2D Max Unpooling layer for reconstructing feature maps.
+
+    This layer performs the inverse operation of max pooling
+    by placing pooled values back into their original positions
+    using the provided indices.
+
+    Attributes
+    ----------
+    config: MaxUnPoolingConfig
+        Config of MaxUnpooling2D.
+
+    """
+
+    config_type = MaxUnPoolingConfig
 
     def call(
         self,
@@ -53,7 +66,7 @@ class MaxUnpooling2D(tf.keras.layers.Layer):
         pooling_indices = tf.cast(pooling_indices, data_type)
         input_shape = tf.shape(pooling_values, out_type=data_type)
 
-        output_shape = input_shape * np.array([1, *self.pool_size, 1])
+        output_shape = input_shape * np.array([1, *self.config.pool_size, 1])
         ones_like_indices = tf.ones_like(pooling_indices, dtype=data_type)
         batches = ones_like_indices * tf.reshape(
             tf.range(output_shape[0], dtype=data_type),
@@ -80,8 +93,8 @@ class MaxUnpooling2D(tf.keras.layers.Layer):
             scatter,
             shape=[
                 -1,
-                input_shape[1] * self.pool_size[0],
-                input_shape[2] * self.pool_size[1],
+                input_shape[1] * self.config.pool_size[0],
+                input_shape[2] * self.config.pool_size[1],
                 input_shape[3],
             ],
         )
@@ -109,7 +122,7 @@ class MaxUnpooling2D(tf.keras.layers.Layer):
         mask_shape = input_shape[1]
         return (
             mask_shape[0],
-            mask_shape[1] * self.pool_size[0],
-            mask_shape[2] * self.pool_size[1],
+            mask_shape[1] * self.config.pool_size[0],
+            mask_shape[2] * self.config.pool_size[1],
             mask_shape[3],
         )

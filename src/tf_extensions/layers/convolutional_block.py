@@ -1,37 +1,50 @@
+"""The module contains a block of multiple convolutional layers."""
 from typing import Any
 
 import tensorflow as tf
 
+from tf_extensions.layers.base_layer import BaseLayer
 from tf_extensions.layers.conv_configs import ConvolutionalBlockConfig
 
 
-class ConvolutionalBlock(tf.keras.layers.Layer):
+class ConvolutionalBlock(BaseLayer):
     """
     A block of multiple convolutional layers.
 
     The block can optionally include batch normalization, spatial dropout,
     and skip connections.
 
-    Parameters
+    Attributes
     ----------
-    filters : int
-        Number of filters in each convolutional layer.
     config : ConvolutionalBlockConfig
         Configuration of the block.
 
     """
 
+    config_type = ConvolutionalBlockConfig
+    attributes = (
+        'conv_layers',
+        'normalizations',
+        'dropouts',
+        'activations',
+    )
+
     def __init__(
         self,
         filters: int,
-        config: ConvolutionalBlockConfig,
-        *args,
         **kwargs,
     ) -> None:
-        """Initialize self. See help(type(self)) for accurate signature."""
-        super().__init__(*args, **kwargs)
+        """
+        Initialize `ConvolutionalBlock`.
+
+        Parameters
+        ----------
+        filters : int
+            Number of filters in each convolutional layer.
+
+        """
+        super().__init__(**kwargs)
         self.filters = filters
-        self.config = config
         self.conv_layers = []
         self.activations = []
         self.normalizations = []
@@ -103,17 +116,11 @@ class ConvolutionalBlock(tf.keras.layers.Layer):
 
         """
         config = super().get_config()
-        config_as_dict = self.config.as_dict()
-        for field_name, field_value in config_as_dict.items():
+        for field_name, field_value in self.config.as_dict().items():
             if field_name != 'conv2d_config':
                 config[field_name] = field_value
-        attributes = (
-            'conv_layers',
-            'normalizations',
-            'dropouts',
-            'activations',
-        )
-        for attribute in attributes:
+
+        for attribute in self.__class__.attributes:
             config[attribute] = []
             for layer in getattr(self, attribute):
                 config[attribute].append(layer.get_config())

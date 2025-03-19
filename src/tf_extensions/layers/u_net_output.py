@@ -1,12 +1,18 @@
+"""The module contains U-Net Output Layer."""
+from dataclasses import dataclass
+
 import tensorflow as tf
 
+from tf_extensions.auxiliary.base_config import BaseConfig
 from tf_extensions.auxiliary.custom_types import MaskType, TrainingType
+from tf_extensions.layers.base_layer import BaseLayer
 from tf_extensions.layers.conv_configs import Conv2DConfig
 
 
-class UNetOutputLayer(tf.keras.layers.Layer):
+@dataclass
+class UNetOutputLayerConfig(BaseConfig):
     """
-    A layer that applies a 1D or 2D convolution to produce the final output.
+    Config of U-Net Output Layer.
 
     Parameters
     ----------
@@ -19,29 +25,41 @@ class UNetOutputLayer(tf.keras.layers.Layer):
 
     """
 
-    def __init__(
-        self,
-        vector_length: int = None,
-        conv2d_config: Conv2DConfig = None,
-        **kwargs,
-    ) -> None:
+    vector_length: int = None
+    conv2d_config: Conv2DConfig = None
+
+    def __post_init__(self) -> None:
+        """Update config properties after initialization."""
+        if self.conv2d_config is None:
+            self.conv2d_config = Conv2DConfig()  # noqa: WPS601
+
+
+class UNetOutputLayer(BaseLayer):
+    """
+    A layer that applies a 1D or 2D convolution to produce the final output.
+
+    Attributes
+    ----------
+    config: UNetOutputLayerConfig
+        Config of UNetOutputLayer.
+
+    """
+
+    config_type = UNetOutputLayerConfig
+
+    def __init__(self, **kwargs) -> None:
         """Initialize self. See help(type(self)) for accurate signature."""
         super().__init__(**kwargs)
-        self.vector_length = vector_length
-        if conv2d_config:
-            self.conv2d_config = conv2d_config
-        else:
-            self.conv2d_config = Conv2DConfig()
-        if self.vector_length:
+        if self.config.vector_length:
             self.out_layer = tf.keras.layers.Conv1D(
                 filters=1,
-                kernel_size=self.vector_length,
+                kernel_size=self.config.vector_length,
             )
         else:
             self.out_layer = tf.keras.layers.Conv2D(
                 filters=1,
                 activation='sigmoid',
-                **self.conv2d_config.as_dict(),
+                **self.config.conv2d_config.as_dict(),
             )
 
     def call(
@@ -69,10 +87,10 @@ class UNetOutputLayer(tf.keras.layers.Layer):
 
         """
         out = inputs
-        if self.vector_length:
+        if self.config.vector_length:
             out = tf.image.resize(
                 out,
-                size=(tf.shape(out)[1], self.vector_length),
+                size=(tf.shape(out)[1], self.config.vector_length),
                 method=tf.image.ResizeMethod.BILINEAR,
             )
             return self.out_layer(out)
