@@ -1,4 +1,4 @@
-from tf_extensions.losses.adaptive_nmae import AdaptiveNMAE
+"""The package contains custom Tensorflow losses."""
 from tf_extensions.losses.combined_loss import CombinedLoss
 from tf_extensions.losses.dists import DISTS
 from tf_extensions.losses.dssim import DSSIM
