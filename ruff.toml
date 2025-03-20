@@ -11,7 +11,7 @@ extend-exclude = [
 
 [format]
 quote-style = "single"
-docstring-code-format = false
+docstring-code-format = true
 
 [lint]
 extend-select = [
@@ -61,6 +61,8 @@ ignore = [
   "ANN102", # Missing type annotation for cls in classmethod
   "ANN002", # Missing type annotation for *args
   "ANN003", # Missing type annotation for **kwargs
+  "D203",   # 1 blank line required before class docstring
+  "D212",   # Multi-line docstring summary should start at the first line
 #  "WPS410", # Forbid some module-level variables
 #  "WPS412", # Forbid logic inside __init__ module
 ]
@@ -81,3 +83,6 @@ external = [
   "S603", # do not require `shell=True`
   "S607", # partial executable paths
 ]
+
+[lint.flake8-quotes]
+inline-quotes = "single"
