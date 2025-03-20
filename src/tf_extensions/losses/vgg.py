@@ -1,3 +1,5 @@
+"""Module providing a VGG-based perceptual loss function using TensorFlow."""
+
 from dataclasses import dataclass
 
 import tensorflow as tf
@@ -8,6 +10,22 @@ from tf_extensions.losses.vgg_base import VGGBase, VGGBaseConfig
 
 @dataclass
 class VGGLossConfig(VGGBaseConfig):
+    """
+    Configuration for the VGGLoss class.
+
+    Attributes
+    ----------
+    name : str
+        Name of the loss function.
+    loss : str
+        Type of loss function to use ('mse', 'mae', or 'ssim').
+    filter_size : int
+        Filter size for SSIM computation.
+    is_preprocessed : bool
+        Whether input images are required preprocessing for VGG.
+
+    """
+
     name: str = 'vgg'
     loss: str = 'mse'
     filter_size: int = 11
@@ -15,7 +33,19 @@ class VGGLossConfig(VGGBaseConfig):
 
 
 class VGGLoss(VGGBase):
-    """Class for the VGG loss."""
+    """
+    Class for computing perceptual loss using VGG feature maps.
+
+    This class extends `VGGBase` to compute loss based on feature maps
+    extracted from a VGG model.
+    It supports multiple loss functions, including MSE, MAE, and DSSIM.
+
+    Attributes
+    ----------
+    config : VGGLossConfig
+        Configuration of VGGLoss.
+
+    """
 
     config_type = VGGLossConfig
 
@@ -24,6 +54,22 @@ class VGGLoss(VGGBase):
         y_true: tf.Tensor,
         y_pred: tf.Tensor,
     ) -> tuple[tf.Tensor, tf.Tensor]:
+        """
+        Preprocesses input images before extracting VGG feature maps.
+
+        Parameters
+        ----------
+        y_true : tf.Tensor
+            Ground-truth images.
+        y_pred : tf.Tensor
+            Predicted images.
+
+        Returns
+        -------
+        tuple of tf.Tensor
+            Preprocessed ground-truth and predicted images.
+
+        """
         y_true, y_pred = super()._preprocess_images(
             y_true=y_true,
             y_pred=y_pred,
@@ -41,6 +87,27 @@ class VGGLoss(VGGBase):
         y_true: tf.Tensor,
         y_pred: tf.Tensor,
     ) -> tuple[tf.Tensor, tf.Tensor]:
+        """
+        Prepare images for VGG19.
+
+        Parameters
+        ----------
+        y_true : tf.Tensor
+            Ground-truth images.
+        y_pred : tf.Tensor
+            Predicted images.
+
+        Returns
+        -------
+        tuple of tf.Tensor
+            Preprocessed ground-truth and predicted images.
+
+        Raises
+        ------
+        ValueError
+            If images do not have exactly three channels.
+
+        """
         true_channels = y_true.shape[-1]
         pred_channels = y_pred.shape[-1]
         if true_channels != 3:
@@ -62,6 +129,27 @@ class VGGLoss(VGGBase):
         true_features: tf.Tensor,
         pred_features: tf.Tensor,
     ) -> tf.Tensor:
+        """
+        Return the loss between true and predicted feature maps.
+
+        Parameters
+        ----------
+        true_features : tf.Tensor
+            Feature maps extracted from VGG for ground-truth images.
+        pred_features : tf.Tensor
+            Feature maps extracted from VGG for predicted images.
+
+        Returns
+        -------
+        tf.Tensor
+            Computed loss value.
+
+        Raises
+        ------
+        ValueError
+            If the specified loss function is not supported.
+
+        """
         loss_methods = {
             'mse': self._get_mse,
             'mae': self._get_mae,
@@ -87,6 +175,27 @@ class VGGLoss(VGGBase):
         true_feat: tf.Tensor,
         pred_feat: tf.Tensor,
     ) -> tf.Tensor:
+        """
+        Return the DSSIM loss.
+
+        Parameters
+        ----------
+        true_feat : tf.Tensor
+            Feature map of the ground-truth image.
+        pred_feat : tf.Tensor
+            Feature map of the predicted image.
+
+        Returns
+        -------
+        tf.Tensor
+            Computed DSSIM loss.
+
+        Raises
+        ------
+        ValueError
+            If filter size in config is too big for the specified VGG layer.
+
+        """
         if self.config.is_preprocessed:
             max_value = tf.uint8.max
         else:
@@ -110,6 +219,22 @@ class VGGLoss(VGGBase):
         true_feat: tf.Tensor,
         pred_feat: tf.Tensor,
     ) -> tf.Tensor:
+        """
+        Return the MSE loss.
+
+        Parameters
+        ----------
+        true_feat : tf.Tensor
+            Feature map of the ground-truth image.
+        pred_feat : tf.Tensor
+            Feature map of the predicted image.
+
+        Returns
+        -------
+        tf.Tensor
+            Computed MSE loss.
+
+        """
         return tf.reduce_mean(
             tf.square(true_feat - pred_feat),
             axis=[1, 2, 3],
@@ -121,6 +246,22 @@ class VGGLoss(VGGBase):
         true_feat: tf.Tensor,
         pred_feat: tf.Tensor,
     ) -> tf.Tensor:
+        """
+        Return the MAE loss.
+
+        Parameters
+        ----------
+        true_feat : tf.Tensor
+            Feature map of the ground-truth image.
+        pred_feat : tf.Tensor
+            Feature map of the predicted image.
+
+        Returns
+        -------
+        tf.Tensor
+            Computed MAE loss.
+
+        """
         return tf.reduce_mean(
             tf.abs(true_feat - pred_feat),
             axis=[1, 2, 3],

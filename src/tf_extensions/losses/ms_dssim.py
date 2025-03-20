@@ -1,3 +1,4 @@
+"""Module providing the Multi-Scale DSSIM loss function."""
 from dataclasses import dataclass
 
 import tensorflow as tf
@@ -8,6 +9,26 @@ from tf_extensions.losses.dssim import DSSIM, SSIMBaseConfig
 
 @dataclass
 class MultiScaleDSSIMConfig(SSIMBaseConfig):
+    """
+    Configuration for the Multi-Scale DSSIM loss function.
+
+    Attributes
+    ----------
+    name : str
+        Name of the loss function.
+    power_factors : list of float, optional
+        Weighting factors for different scales (default is predefined values).
+    level : int
+        Number of scales to compute MS-DSSIM (default: 5).
+    with_batches_averaging : bool
+        Whether to average over batches (default: False).
+    pool_strides : int
+        Stride for downsampling (default: 2).
+    pool_kernel : int
+        Kernel size for downsampling (default: 2).
+
+    """
+
     name: str = 'ms_dssim'
     power_factors: list[float] = None
     level: int = 5
@@ -16,6 +37,15 @@ class MultiScaleDSSIMConfig(SSIMBaseConfig):
     pool_kernel: int = 2
 
     def __post_init__(self) -> None:
+        """
+        Validate and initialize default values for the configuration.
+
+        Raises
+        ------
+        ValueError
+            If `level` is greater than length of `power_factors`.
+
+        """
         if self.power_factors is None:
             self.power_factors = [  # noqa: WPS601
                 0.0448, 0.2856, 0.3001, 0.2363, 0.1333,
@@ -27,11 +57,22 @@ class MultiScaleDSSIMConfig(SSIMBaseConfig):
 
 
 class MultiScaleDSSIM(BaseLoss):
-    """Class for the MS-DSSIM."""
+    """
+    Multi-Scale DSSIM (MS-DSSIM) loss function.
+
+    Attributes
+    ----------
+    config : MultiScaleDSSIMConfig
+        Configuration of MultiScaleDSSIM.
+    min_shape : int
+        Minimum image shape required for computation.
+
+    """
 
     config_type = MultiScaleDSSIMConfig
 
     def __init__(self, **kwargs) -> None:
+        """Initialize self. See help(type(self)) for accurate signature."""
         super().__init__(**kwargs)
         scale = self.config.pool_strides ** (self.config.level - 1)
         self.min_shape = scale * self.config.filter_size
@@ -41,6 +82,22 @@ class MultiScaleDSSIM(BaseLoss):
         y_true: tf.Tensor,
         y_pred: tf.Tensor,
     ) -> tf.Tensor:
+        """
+        Return the MS-DSSIM loss.
+
+        Parameters
+        ----------
+        y_true : tf.Tensor
+            Ground truth image tensor.
+        y_pred : tf.Tensor
+            Predicted image tensor.
+
+        Returns
+        -------
+        tf.Tensor
+            MS-DSSIM loss value.
+
+        """
         ms_ssim = self.get_ms_ssim(y_true=y_true, y_pred=y_pred)
         return tf.divide(
             tf.convert_to_tensor(value=1, dtype=self.config.dtype) - ms_ssim,
@@ -52,6 +109,22 @@ class MultiScaleDSSIM(BaseLoss):
         y_true: tf.Tensor,
         y_pred: tf.Tensor,
     ) -> tf.Tensor:
+        """
+        Compute the multiscale SSIM value.
+
+        Parameters
+        ----------
+        y_true : tf.Tensor
+            Ground truth image tensor.
+        y_pred : tf.Tensor
+            Predicted image tensor.
+
+        Returns
+        -------
+        tf.Tensor
+            Multi-scale SSIM value per batch.
+
+        """
         self._check_shapes(y_true=y_true, y_pred=y_pred)
         y_true, y_pred = self.cast_to_dtype(y_true=y_true, y_pred=y_pred)
         if self.config.max_val == 1:
@@ -130,6 +203,15 @@ class MultiScaleDSSIM(BaseLoss):
         return ms_ssim_per_batch
 
     def get_dssim(self) -> DSSIM:
+        """
+        Return a DSSIM instance with the configured parameters.
+
+        Returns
+        -------
+        DSSIM
+            Object for DSSIM calculation.
+
+        """
         return DSSIM(
             dtype=self.config.dtype,
             max_val=self.config.max_val,
@@ -147,6 +229,22 @@ class MultiScaleDSSIM(BaseLoss):
         y_true: tf.Tensor,
         y_pred: tf.Tensor,
     ) -> None:
+        """
+        Validate input tensor shapes.
+
+        Parameters
+        ----------
+        y_true : tf.Tensor
+            Ground truth image tensor.
+        y_pred : tf.Tensor
+            Predicted image tensor.
+
+        Raises
+        ------
+        ValueError
+            If one of images is less than `min_shape`.
+
+        """
         min_shape = self.min_shape
         if y_true.shape[1] < min_shape or y_true.shape[2] < min_shape:
             raise ValueError(
@@ -165,13 +263,39 @@ class MultiScaleDSSIM(BaseLoss):
 
     @classmethod
     def _relu_mean(cls, tensor: tf.Tensor) -> tf.Tensor:
-        """Apply ReLU and reduce mean."""
+        """
+        Calculate mean of image channel and apply ReLU.
+
+        Parameters
+        ----------
+        tensor : tf.Tensor
+            Input image.
+
+        Returns
+        -------
+        tf.Tensor
+            ReLU output.
+
+        """
         mean = tf.reduce_mean(tensor, axis=(1, 2))
         # noinspection PyTypeChecker
         return tf.nn.relu(mean)
 
     @classmethod
     def _stack_and_transpose(cls, tensor_list: list[tf.Tensor]) -> tf.Tensor:
-        """Stack list into tensor and transpose."""
+        """
+        Stack list into tensor and transpose.
+
+        Parameters
+        ----------
+        tensor_list : list of tf.Tensor
+            List of tensors for stacking.
+
+        Returns
+        -------
+        tf.Tensor
+            Transposed tensor from the stacked list.
+
+        """
         stacked = tf.stack(tensor_list, axis=0)
         return tf.transpose(stacked, perm=[1, 0, 2])

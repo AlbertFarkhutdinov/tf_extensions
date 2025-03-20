@@ -1,3 +1,4 @@
+"""Module contains base class for losses using VGG."""
 from dataclasses import dataclass
 
 import tensorflow as tf
@@ -9,11 +10,27 @@ from tf_extensions.losses.base_loss import BaseLoss, BaseLossConfig
 
 @dataclass
 class VGGBaseConfig(BaseLossConfig):
+    """
+    Configuration class for VGG-based loss.
+
+    Attributes
+    ----------
+    name : str
+        Name of the loss function.
+    layer_names : list of str, optional
+        List of layer names to extract features from.
+        Defaults to ['block5_conv2'] if None.
+    batch_size : int, optional
+        Batch size for feature extraction.
+
+    """
+
     name: str = 'vgg_base'
     layer_names: list[str] = None
     batch_size: int = None
 
     def __post_init__(self) -> None:
+        """Update config properties after initialization."""
         if self.layer_names is None:
             self.layer_names = ['block5_conv4']  # noqa: WPS601
 
@@ -22,17 +39,19 @@ class VGGBase(BaseLoss):
     """
     Base class for losses using VGG.
 
-    Parameters
+    Attributes
     ----------
-    layer_names : list, optional
-        List of layer names to extract features from.
-        Defaults to ['block5_conv2'] if None.
+    config : VGGBaseConfig
+        Configuration of VGGBase.
+    model : tf.keras.Model
+        A feature extractor model using VGG19.
 
     """
 
     config_type = VGGBaseConfig
 
     def __init__(self, **kwargs) -> None:
+        """Initialize self. See help(type(self)) for accurate signature."""
         super().__init__(**kwargs)
         layer_names = self.config.layer_names
         self.model = self._get_feature_extractor(layer_names=layer_names)
@@ -73,6 +92,20 @@ class VGGBase(BaseLoss):
         cls,
         layer_names: list[str],
     ) -> tf.keras.Model:
+        """
+        Return a feature extractor model using VGG19.
+
+        Parameters
+        ----------
+        layer_names : list of str
+            Names of the VGG19 layers to extract features from.
+
+        Returns
+        -------
+        tf.keras.Model
+            A feature extraction model with selected layer outputs.
+
+        """
         vgg = VGG19(weights='imagenet', include_top=False)
         outputs = [
             vgg.get_layer(name).output
@@ -87,6 +120,22 @@ class VGGBase(BaseLoss):
         y_true: tf.Tensor,
         y_pred: tf.Tensor,
     ) -> tuple[tf.Tensor, tf.Tensor]:
+        """
+        Preprocess input images before feature extraction.
+
+        Parameters
+        ----------
+        y_true : tf.Tensor
+            Ground truth images.
+        y_pred : tf.Tensor
+            Predicted images.
+
+        Returns
+        -------
+        tuple[tf.Tensor, tf.Tensor]
+            Processed y_true and y_pred tensors.
+
+        """
         y_true, y_pred = self.cast_to_dtype(y_true=y_true, y_pred=y_pred)
         y_true, y_pred = self.normalize_images(y_true=y_true, y_pred=y_pred)
         unit_tensor = tf.convert_to_tensor(value=1, dtype=self.config.dtype)
@@ -99,6 +148,22 @@ class VGGBase(BaseLoss):
         y_true: tf.Tensor,
         y_pred: tf.Tensor,
     ) -> tuple[list[tf.Tensor], list[tf.Tensor]]:
+        """
+        Extract features from images using VGG19.
+
+        Parameters
+        ----------
+        y_true : tf.Tensor
+            Ground truth images.
+        y_pred : tf.Tensor
+            Predicted images.
+
+        Returns
+        -------
+        tuple[list[tf.Tensor], list[tf.Tensor]]
+            Extracted features for true and predicted images.
+
+        """
         if self.config.batch_size is None:
             true_features = self.model(y_true)
             pred_features = self.model(y_pred)
@@ -123,6 +188,22 @@ class VGGBase(BaseLoss):
         true_features: list[tf.Tensor],
         pred_features: list[tf.Tensor],
     ) -> tf.Tensor:
+        """
+        Return the perceptual loss between extracted features.
+
+        Parameters
+        ----------
+        true_features : list of tf.Tensor
+            Extracted features from ground truth images.
+        pred_features : list of tf.Tensor
+            Extracted features from predicted images.
+
+        Returns
+        -------
+        tf.Tensor
+            Computed loss value.
+
+        """
         losses = []
         for true_feat, pred_feat in zip(true_features, pred_features):
             true_feat = tf.cast(true_feat, self.config.dtype)

@@ -1,3 +1,4 @@
+"""Module providing dictionary of losses supported by CombinedLoss."""
 from tf_extensions.losses.dists import DISTS
 from tf_extensions.losses.dssim import DSSIM
 from tf_extensions.losses.fft import FFTLoss

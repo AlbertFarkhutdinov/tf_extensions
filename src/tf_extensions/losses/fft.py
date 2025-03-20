@@ -1,3 +1,4 @@
+"""Module providing frequency-based losses in deep learning models."""
 from dataclasses import dataclass
 
 import tensorflow as tf
@@ -7,12 +8,37 @@ from tf_extensions.losses.base_loss import BaseLoss, BaseLossConfig
 
 @dataclass
 class FFTLossConfig(BaseLossConfig):
+    """
+    Configuration class of FFTLoss.
+
+    Parameters
+    ----------
+    name : str, default: 'fft'
+        Name of the loss function.
+    loss : {'mse', 'mae', 'ssim'}, default: 'mse'
+        Type of loss function to use.
+    filter_size : int, default: 11
+        Filter size used for SSIM calculation.
+    is_averaged_loss : bool, default: False
+        If True, loss is averaged across multiple axes.
+
+    """
+
     name: str = 'fft'
     loss: str = 'mse'
     filter_size: int = 11
     is_averaged_loss: bool = False
 
     def __post_init__(self) -> None:
+        """
+        Validate attributes after initialization.
+
+        Raises
+        ------
+        ValueError
+            If dtype is not 'float32' or 'float64'.
+
+        """
         if self.dtype not in {'float32', 'float64'}:
             raise ValueError(
                 'Unsupported dtype in FFTLoss: {0}'.format(self.dtype),
@@ -20,7 +46,20 @@ class FFTLossConfig(BaseLossConfig):
 
 
 class FFTLoss(BaseLoss):
-    """Class for the FFT loss."""
+    """
+    Class for computing FFT-based loss functions in deep learning models.
+
+    This class calculates loss functions based on Fourier Transforms of images.
+    It supports Mean Squared Error (MSE), Mean Absolute Error (MAE),
+    and Structural Similarity Index Measure (SSIM) loss computations
+    in the frequency domain.
+
+    Attributes
+    ----------
+    config : FFTLossConfig
+        Configuration of FFTLoss.
+
+    """
 
     config_type = FFTLossConfig
 
@@ -43,6 +82,11 @@ class FFTLoss(BaseLoss):
         -------
         float
             The computed VGG loss.
+
+        Raises
+        ------
+        ValueError
+            If an unsupported loss function is specified.
 
         """
         fft_true, fft_pred = self._get_fft_pair(y_true=y_true, y_pred=y_pred)
@@ -77,6 +121,22 @@ class FFTLoss(BaseLoss):
         y_true: tf.Tensor,
         y_pred: tf.Tensor,
     ) -> tuple[tf.Tensor, tf.Tensor]:
+        """
+        Return the FFT representations of true and predicted images.
+
+        Parameters
+        ----------
+        y_true : tf.Tensor
+            Ground truth images.
+        y_pred : tf.Tensor
+            Predicted images.
+
+        Returns
+        -------
+        tuple of tf.Tensor
+            FFT-transformed true and predicted images.
+
+        """
         y_true, y_pred = self.cast_to_dtype(y_true=y_true, y_pred=y_pred)
         y_true, y_pred = self.normalize_images(y_true=y_true, y_pred=y_pred)
 
@@ -98,6 +158,27 @@ class FFTLoss(BaseLoss):
         fft_true: tf.Tensor,
         fft_pred: tf.Tensor,
     ) -> tf.Tensor:
+        """
+        Return the Structural Similarity Index (SSIM) between FFT images.
+
+        Parameters
+        ----------
+        fft_true : tf.Tensor
+            FFT-transformed ground truth images.
+        fft_pred : tf.Tensor
+            FFT-transformed predicted images.
+
+        Returns
+        -------
+        tf.Tensor
+            SSIM value between the two images.
+
+        Raises
+        ------
+        ValueError
+            If the filter size is too large for the input image dimensions.
+
+        """
         max_true = tf.reduce_max(fft_true)
         try:
             ssim = tf.image.ssim(
@@ -120,7 +201,7 @@ class FFTLoss(BaseLoss):
         is_xl_averaged: bool,
     ) -> tf.Tensor:
         """
-        Return spectra of the batch.
+        Return the Fourier spectra of a batch of images.
 
         Parameters
         ----------
@@ -133,7 +214,7 @@ class FFTLoss(BaseLoss):
         Returns
         -------
         tf.Tensor
-            Spectra of the batch.
+            Fourier spectra of the batch.
 
         """
         transposed = tf.transpose(batch, perm=[0, 3, 2, 1])

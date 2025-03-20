@@ -1,3 +1,4 @@
+"""Module providing a class for Soft Dice Loss function."""
 from dataclasses import dataclass
 
 import tensorflow as tf
@@ -9,11 +10,33 @@ STABILIZATION = 1e-9
 
 @dataclass
 class SoftDiceLossConfig(BaseLossConfig):
+    """
+    Configuration class for Soft Dice Loss.
+
+    Attributes
+    ----------
+    name : str
+        Name of the loss function, default is 'sdl'.
+    """
+
     name: str = 'sdl'
 
 
 class SoftDiceLoss(BaseLoss):
-    """Class for the SoftDiceLoss."""
+    """
+    Class implementing the Soft Dice Loss function.
+
+    This loss function is commonly used for segmentation tasks,
+    measuring the overlap between predicted and true labels.
+    It is a differentiable approximation of the Dice coefficient,
+    which is widely used for evaluating segmentation models.
+
+    Attributes
+    ----------
+    config : SoftDiceLossConfig
+        Configuration of SoftDiceLoss.
+
+    """
 
     config_type = SoftDiceLossConfig
 
@@ -50,6 +73,25 @@ class SoftDiceLoss(BaseLoss):
         y_true: tf.Tensor,
         y_pred: tf.Tensor,
     ) -> tuple[tf.Tensor, tf.Tensor]:
+        """
+        Cast input tensors to the appropriate dtype and apply thresholding.
+
+        This method ensures that input tensors are cast to the correct dtype
+        and binarized using a threshold of 0.
+
+        Parameters
+        ----------
+        y_true : tf.Tensor
+            Ground truth segmentation mask tensor.
+        y_pred : tf.Tensor
+            Predicted segmentation mask tensor.
+
+        Returns
+        -------
+        tuple of tf.Tensor
+            Thresholded and cast tensors.
+
+        """
         threshold = 0
         # noinspection PyTypeChecker
         return super().cast_to_dtype(
@@ -59,4 +101,18 @@ class SoftDiceLoss(BaseLoss):
 
     @classmethod
     def _get_sum(cls, tensor: tf.Tensor) -> tf.Tensor:
+        """
+        Return the sum of a tensor along spatial and channel axes.
+
+        Parameters
+        ----------
+        tensor : tf.Tensor
+            Input tensor.
+
+        Returns
+        -------
+        tf.Tensor
+            Reduced sum over axes [1, 2, 3].
+
+        """
         return tf.reduce_sum(tensor, axis=[1, 2, 3])
