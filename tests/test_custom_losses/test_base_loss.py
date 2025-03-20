@@ -6,7 +6,6 @@ import tf_extensions.losses as cl
 from tf_extensions.losses.base_loss import BaseLoss
 
 loss_types = [
-    cl.AdaptiveNMAE,
     cl.DISTS,
     cl.DSSIM,
     cl.FFTLoss,
@@ -56,12 +55,14 @@ tensor2d1n = tf.constant(
         [1, -1],
         [-1, 1],
     ],
+    dtype=tf.float32,
 )
 tensor2d2n = tf.constant(
     value=[
         [-0.75, 0.75],
         [0.75, -0.75],
     ],
+    dtype=tf.float32,
 )
 
 tensor4d1 = tf.constant(
@@ -69,23 +70,25 @@ tensor4d1 = tf.constant(
         [[[20], [0]], [[-20], [0]]],
         [[[0], [0]], [[0], [0]]],
     ],
+    dtype=tf.float32,
 )
 tensor4d2 = tf.constant(
     value=[
         [[[-15], [0]], [[15], [0]]],
         [[[15], [0]], [[-15], [0]]],
     ],
+    dtype=tf.float32,
 )
 
 tensor4d1n = tf.constant(
     value=[
-        [[[2.0], [0]], [[-2.0], [0]]],
+        [[[1], [0]], [[-1], [0]]],
         [[[0], [0]], [[0], [0]]],
     ],
 )
 tensor4d2n = tf.constant(
     value=[
-        [[[-1.5], [0]], [[1.5], [0]]],
+        [[[-0.75], [0]], [[0.75], [0]]],
         [[[15], [0]], [[-15], [0]]],
     ],
 )

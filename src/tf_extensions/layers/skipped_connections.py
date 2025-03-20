@@ -63,7 +63,7 @@ class SkippedConnections(BaseLayer):
             tf.keras.layers.Conv2D(
                 filters=self.config.filters,
                 activation=None,
-                **self.config.conv2d_config.as_dict(),
+                **self.config.config.conv2d_config.as_dict(),
             )
             for _ in range(self.config.blocks_number)
         ]

@@ -29,9 +29,9 @@ class TestUNetOutputLayer:
             vector_length=vector_length,
             conv2d_config=conv2d_config,
         )
-        assert layer.vector_length == vector_length
-        assert isinstance(layer.conv2d_config, cc.Conv2DConfig)
-        if layer.vector_length:
+        assert layer.config.vector_length == vector_length
+        assert isinstance(layer.config.conv2d_config, cc.Conv2DConfig)
+        if layer.config.vector_length:
             assert isinstance(layer.out_layer, tf.keras.layers.Conv1D)
         else:
             assert isinstance(layer.out_layer, tf.keras.layers.Conv2D)

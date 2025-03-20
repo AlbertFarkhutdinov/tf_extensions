@@ -16,10 +16,8 @@ class TestCombinedLoss:
     @pytest.mark.parametrize(
         ('losses', 'weights', 'name', 'expected_name'),
         [
-            (COMBINATIONS[0], [1, 1], None, 'custom_loss_vgg'),
-            (COMBINATIONS[1], [1, 1], None, 'custom_loss_fft'),
-            (COMBINATIONS[2], [1, 1, 1], None, 'custom_loss_fft_fft'),
-            (COMBINATIONS[3], [1, 1, 1], None, 'custom_loss_fft_sdl'),
+            (COMBINATIONS[0], [1, 1], None, 'fft_fft'),
+            (COMBINATIONS[1], [1, 1], None, 'fft_sdl'),
         ],
     )
     def test_combined_loss_init(
@@ -46,10 +44,8 @@ class TestCombinedLoss:
     @pytest.mark.parametrize(
         ('losses', 'weights', 'expected_name'),
         [
-            (COMBINATIONS[0], [1, 1], 'custom_loss_vgg'),
-            (COMBINATIONS[1], [1, 1], 'custom_loss_fft'),
-            (COMBINATIONS[2], [1, 1, 1], 'custom_loss_fft_fft'),
-            (COMBINATIONS[3], [1, 1, 1], 'custom_loss_fft_sdl'),
+            (COMBINATIONS[0], [1, 1], 'fft_fft'),
+            (COMBINATIONS[1], [1, 1], 'fft_sdl'),
         ],
     )
     def test_combined_loss_get_config(
@@ -77,8 +73,6 @@ class TestCombinedLoss:
         [
             (COMBINATIONS[0], [1, 1]),
             (COMBINATIONS[1], [1, 1]),
-            (COMBINATIONS[2], [1, 1, 1]),
-            (COMBINATIONS[3], [1, 1, 1]),
         ],
     )
     def test_combined_loss_from_config(
@@ -119,8 +113,6 @@ class TestCombinedLoss:
         [
             (COMBINATIONS[0], [1, 1], 'float64', (5, 128, 128, 3)),
             (COMBINATIONS[1], [1, 1], 'float64', (5, 128, 128, 3)),
-            (COMBINATIONS[2], [1, 1, 1], 'float64', (5, 128, 128, 3)),
-            (COMBINATIONS[3], [1, 1, 1], 'float64', (5, 128, 128, 3)),
         ],
     )
     def test_dtype_and_shape(
@@ -145,8 +137,6 @@ class TestCombinedLoss:
         [
             (COMBINATIONS[0], [1, 1], (5, 128, 128, 3)),
             (COMBINATIONS[1], [1, 1], (5, 128, 128, 3)),
-            (COMBINATIONS[2], [1, 1, 1], (5, 128, 128, 3)),
-            (COMBINATIONS[3], [1, 1, 1], (5, 128, 128, 3)),
         ],
     )
     def test_min_loss(

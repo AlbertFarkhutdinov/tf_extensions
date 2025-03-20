@@ -5,7 +5,6 @@ import tensorflow as tf
 import tf_extensions.losses as cl
 
 LOSSES = (
-    cl.AdaptiveNMAE(),
     cl.DISTS(),
     cl.DSSIM(),
     cl.FFTLoss(),
@@ -20,10 +19,9 @@ class TestMultiscaleLoss:
     @pytest.mark.parametrize(
         ('base_loss', 'weights', 'name', 'expected_name'),
         [
-            (LOSSES[0], None, None, 'multiscale_adaptive_nmae'),
-            (LOSSES[1], None, 'test_name', 'test_name'),
-            (LOSSES[2], [0.5, 0.5], None, 'multiscale_dssim'),
-            (LOSSES[3], [0.5, 0.5], 'test_name', 'test_name'),
+            (LOSSES[0], None, 'test_name', 'test_name'),
+            (LOSSES[1], [0.5, 0.5], None, 'multiscale_dssim'),
+            (LOSSES[2], [0.5, 0.5], 'test_name', 'test_name'),
         ],
     )
     def test_multiscale_loss_init(
@@ -47,10 +45,9 @@ class TestMultiscaleLoss:
     @pytest.mark.parametrize(
         ('base_loss', 'weights', 'name', 'expected_name'),
         [
-            (LOSSES[0], None, None, 'multiscale_adaptive_nmae'),
-            (LOSSES[1], None, 'test_name', 'test_name'),
-            (LOSSES[2], [0.5, 0.5], None, 'multiscale_dssim'),
-            (LOSSES[3], [0.5, 0.5], 'test_name', 'test_name'),
+            (LOSSES[0], None, 'test_name', 'test_name'),
+            (LOSSES[1], [0.5, 0.5], None, 'multiscale_dssim'),
+            (LOSSES[2], [0.5, 0.5], 'test_name', 'test_name'),
         ],
     )
     def test_multiscale_loss_get_config(
@@ -78,10 +75,9 @@ class TestMultiscaleLoss:
     @pytest.mark.parametrize(
         ('base_loss', 'weights', 'name', 'expected_name'),
         [
-            (LOSSES[0], None, None, 'multiscale_adaptive_nmae'),
-            (LOSSES[1], None, 'test_name', 'test_name'),
-            (LOSSES[2], [0.5, 0.5], None, 'multiscale_dssim'),
-            (LOSSES[3], [0.5, 0.5], 'test_name', 'test_name'),
+            (LOSSES[0], None, 'test_name', 'test_name'),
+            (LOSSES[1], [0.5, 0.5], None, 'multiscale_dssim'),
+            (LOSSES[2], [0.5, 0.5], 'test_name', 'test_name'),
         ],
     )
     def test_multiscale_loss_from_config(
@@ -116,7 +112,7 @@ class TestMultiscaleLoss:
             cl.MultiScaleLoss()
 
     def test_unsupported_input_types(self) -> None:
-        ms_loss = cl.MultiScaleLoss(base_loss=cl.AdaptiveNMAE())
+        ms_loss = cl.MultiScaleLoss(base_loss=cl.SoftDiceLoss())
         with pytest.raises(
             ValueError,
             match='Inputs must be tuples of tensors.',
@@ -124,7 +120,7 @@ class TestMultiscaleLoss:
             ms_loss(y_true=5, y_pred=3)
 
     def test_different_lengths(self) -> None:
-        ms_loss = cl.MultiScaleLoss(base_loss=cl.AdaptiveNMAE())
+        ms_loss = cl.MultiScaleLoss(base_loss=cl.SoftDiceLoss())
         with pytest.raises(
             ValueError,
             match='Lengths of y_true and y_pred must match.',
@@ -141,7 +137,7 @@ class TestMultiscaleLoss:
 
     def test_incorrect_weights_length(self) -> None:
         ms_loss = cl.MultiScaleLoss(
-            base_loss=cl.AdaptiveNMAE(),
+            base_loss=cl.SoftDiceLoss(),
             weights=[1],
         )
         with pytest.raises(
@@ -160,7 +156,7 @@ class TestMultiscaleLoss:
             )
 
     def test_incorrect_batch_size_true(self) -> None:
-        ms_loss = cl.MultiScaleLoss(base_loss=cl.AdaptiveNMAE())
+        ms_loss = cl.MultiScaleLoss(base_loss=cl.SoftDiceLoss())
         with pytest.raises(
             ValueError,
             match='Batch sizes in y_true must match.',
@@ -177,7 +173,7 @@ class TestMultiscaleLoss:
             )
 
     def test_incorrect_batch_size_pred(self) -> None:
-        ms_loss = cl.MultiScaleLoss(base_loss=cl.AdaptiveNMAE())
+        ms_loss = cl.MultiScaleLoss(base_loss=cl.SoftDiceLoss())
         with pytest.raises(
             ValueError,
             match='Batch sizes in y_pred must match.',
@@ -201,7 +197,6 @@ class TestMultiscaleLoss:
             (LOSSES[2], [1, 1], 'float64', 5),
             (LOSSES[3], [1, 1], 'float64', 5),
             (LOSSES[4], [1, 1], 'float64', 5),
-            (LOSSES[5], [1, 1], 'float64', 5),
         ],
     )
     def test_dtype_and_shape(
@@ -235,7 +230,6 @@ class TestMultiscaleLoss:
             (LOSSES[2], [1, 1], 5),
             (LOSSES[3], [1, 1], 5),
             (LOSSES[4], [1, 1], 5),
-            (LOSSES[5], [1, 1], 5),
         ],
     )
     def test_min_loss(

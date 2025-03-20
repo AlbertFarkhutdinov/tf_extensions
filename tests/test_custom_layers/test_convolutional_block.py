@@ -27,13 +27,11 @@ class TestConvolutionalBlock:
     ) -> None:
         block = cl.ConvolutionalBlock(
             filters=filters,
-            config=cc.ConvolutionalBlockConfig(
-                conv2d_config=cc.Conv2DConfig(),
-                layers_number=layers_number,
-                activation=activation,
-                with_bn=with_bn,
-                with_dropout=with_dropout,
-            ),
+            conv2d_config=cc.Conv2DConfig(),
+            layers_number=layers_number,
+            activation=activation,
+            with_bn=with_bn,
+            with_dropout=with_dropout,
         )
         assert block.config.with_bn == with_bn
         assert block.config.with_dropout == with_dropout
