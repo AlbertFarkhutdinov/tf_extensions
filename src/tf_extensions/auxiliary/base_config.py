@@ -2,9 +2,19 @@
 from contextlib import suppress
 from dataclasses import Field, asdict, dataclass, fields
 from inspect import signature
-from typing import Any, Optional, TypeVar
+from typing import Optional, TypeVar, Union
 
 BaseConfigType = TypeVar('BaseConfigType', bound='BaseConfig')
+
+JSONField = Union[
+    bool,
+    int,
+    float,
+    str,
+    list['JSONField'],
+    dict[str, 'JSONField'],
+    None,
+]
 
 
 @dataclass
@@ -28,7 +38,7 @@ class BaseConfig:
 
     """
 
-    def as_dict(self) -> dict[str, Any]:
+    def as_dict(self) -> dict[str, JSONField]:
         """
         Convert the instance of the class to a dictionary.
 
@@ -42,7 +52,7 @@ class BaseConfig:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, properties: dict[str, Any]) -> BaseConfigType:
+    def from_dict(cls, properties: dict[str, JSONField]) -> BaseConfigType:
         """
         Create an instance of the class from a dictionary.
 
@@ -60,7 +70,7 @@ class BaseConfig:
         kwargs = {}
         # noinspection PyTypeChecker
         for cls_field in fields(cls):
-            if cls_field.name in properties.keys():
+            if cls_field.name in properties:
                 kwargs[cls_field.name] = cls._get_config_property(
                     cls_field=cls_field,
                     properties=properties,
@@ -86,7 +96,7 @@ class BaseConfig:
         """
         native_args, new_args = {}, {}
         for name, kwarg in kwargs.items():
-            if name in signature(cls).parameters.keys():
+            if name in signature(cls).parameters:
                 native_args[name] = kwarg
             else:
                 new_args[name] = kwarg
@@ -103,8 +113,8 @@ class BaseConfig:
     def _get_config_property(
         cls,
         cls_field: Field,
-        properties: dict[str, Any],
-    ) -> Optional[Any]:
+        properties: dict[str, JSONField],
+    ) -> Optional[Union[BaseConfigType, JSONField]]:
         """
         Return a proper config field from a dictionary.
 
@@ -132,10 +142,10 @@ class BaseConfig:
                 return default_factory.from_dict(
                     properties=properties[cls_field.name],
                 )
-            except AttributeError:
-                msg = 'Default factory for `{0}` is undefined.'.format(
-                    cls_field.name,
+            except AttributeError as exc:
+                msg = 'Default factory for `{field}` is undefined.'.format(
+                    field=cls_field.name,
                 )
-                raise ValueError(msg)
+                raise ValueError(msg) from exc
         else:
             return properties[cls_field.name]
