@@ -1,6 +1,6 @@
 import numpy as np
-import tensorflow as tf
 import pytest
+import tensorflow as tf
 
 from tf_extensions.layers import MaxUnpooling2D
 

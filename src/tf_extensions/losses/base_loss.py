@@ -87,7 +87,7 @@ class BaseLoss(tf.keras.losses.Loss):
             If this method is not implemented.
 
         """
-        raise NotImplementedError()  # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     def get_config(self) -> dict[str, Any]:  # noqa: WPS615
         """

@@ -27,6 +27,7 @@ class BaseLayerConfig(BaseConfig):
     ----------
     name : str, optional
         The name of the layer. Defaults to None.
+
     """
 
     name: str = None

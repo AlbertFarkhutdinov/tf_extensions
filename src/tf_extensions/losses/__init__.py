@@ -10,9 +10,9 @@ from tf_extensions.losses.vgg import VGGLoss
 from tf_extensions.losses.vgg_base import VGGBase
 
 __all__ = [
-    'CombinedLoss',
     'DISTS',
     'DSSIM',
+    'CombinedLoss',
     'FFTLoss',
     'MultiScaleDSSIM',
     'MultiScaleLoss',

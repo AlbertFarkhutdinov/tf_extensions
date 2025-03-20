@@ -17,6 +17,7 @@ class SoftDiceLossConfig(BaseLossConfig):
     ----------
     name : str
         Name of the loss function, default is 'sdl'.
+
     """
 
     name: str = 'sdl'

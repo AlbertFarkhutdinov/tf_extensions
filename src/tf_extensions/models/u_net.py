@@ -232,19 +232,18 @@ class UNet(BaseNet):
                     units=1,
                     activation='sigmoid',
                 )
+            elif self.config.vector_length:
+                self.out_layer = tf.keras.layers.Conv1D(
+                    filters=1,
+                    kernel_size=self.config.vector_length,
+                )
             else:
-                if self.config.vector_length:
-                    self.out_layer = tf.keras.layers.Conv1D(
-                        filters=1,
-                        kernel_size=self.config.vector_length,
-                    )
-                else:
-                    self.out_layer = tf.keras.layers.Conv2D(
-                        filters=1,
-                        kernel_size=conv2d_config.kernel_size,
-                        padding=conv2d_config.padding,
-                        activation='sigmoid',
-                    )
+                self.out_layer = tf.keras.layers.Conv2D(
+                    filters=1,
+                    kernel_size=conv2d_config.kernel_size,
+                    padding=conv2d_config.padding,
+                    activation='sigmoid',
+                )
 
     def call(
         self,
@@ -301,16 +300,15 @@ class UNet(BaseNet):
             if self.config.is_binary_classification:
                 out = self.flatten_layer(out)
                 out = self.out_layer(out)
+            elif self.config.vector_length:
+                out = tf.image.resize(
+                    out,
+                    size=(tf.shape(out)[1], self.config.vector_length),
+                    method=tf.image.ResizeMethod.BILINEAR,
+                )
+                out = self.out_layer(out)
             else:
-                if self.config.vector_length:
-                    out = tf.image.resize(
-                        out,
-                        size=(tf.shape(out)[1], self.config.vector_length),
-                        method=tf.image.ResizeMethod.BILINEAR,
-                    )
-                    out = self.out_layer(out)
-                else:
-                    out = self.out_layer(out)
+                out = self.out_layer(out)
         return out
 
     def _get_conv_transpose_layer(
