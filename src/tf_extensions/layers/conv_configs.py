@@ -29,6 +29,20 @@ class Conv2DConfig(BaseConfig):
     use_bias: bool = True
     kernel_initializer: str = 'glorot_uniform'
 
+    def __post_init__(self) -> None:
+        """
+        Validate attributes after initialization.
+
+        Raises
+        ------
+        ValueError
+            If `kernel_size` contains even elements.
+
+        """
+        kernel_size = self.kernel_size
+        if not kernel_size[0] % 2 or not kernel_size[1] % 2:
+            raise ValueError('Odd `kernel_size` is recommended.')
+
     def get_config_name(self) -> str:
         """
         Return the configuration name based on its attributes.
