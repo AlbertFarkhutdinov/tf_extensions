@@ -48,29 +48,20 @@ class TestASPPNet:
         initializer: str,
     ) -> None:
         model = ASPPNet(
-            config=BaseNetConfig(
-                initial_filters_number=filters,
-                conv_block_config=cc.ConvolutionalBlockConfig(
-                    conv2d_config=cc.Conv2DConfig(
-                        kernel_size=kernel,
-                        use_bias=bias,
-                        kernel_initializer=initializer,
-                    ),
-                    activation=activation,
-                    with_bn=bn,
-                    with_dropout=dropout,
+            initial_filters_number=filters,
+            conv_block_config=cc.ConvolutionalBlockConfig(
+                conv2d_config=cc.Conv2DConfig(
+                    kernel_size=kernel,
+                    use_bias=bias,
+                    kernel_initializer=initializer,
                 ),
+                activation=activation,
+                with_bn=bn,
+                with_dropout=dropout,
             ),
         )
         scales = [1, 2, 3, 4, 4, 3]
-        for i, conv_block in enumerate((
-            model.conv_pair1,
-            model.conv_pair2,
-            model.conv_pair3,
-            model.conv_pair4,
-            model.conv_pair5,
-            model.conv_pair6,
-        )):
+        for i, conv_block in enumerate(model.conv_blocks):
             assert isinstance(conv_block, cl.ConvolutionalBlock)
             assert conv_block.filters == filters * scales[i]
             assert conv_block.config.with_bn == bn
@@ -132,18 +123,16 @@ class TestASPPNet:
         initializer: str,
     ) -> None:
         model = ASPPNet(
-            config=BaseNetConfig(
-                initial_filters_number=filters,
-                conv_block_config=cc.ConvolutionalBlockConfig(
-                    conv2d_config=cc.Conv2DConfig(
-                        kernel_size=kernel,
-                        use_bias=bias,
-                        kernel_initializer=initializer,
-                    ),
-                    activation=activation,
-                    with_bn=bn,
-                    with_dropout=dropout,
+            initial_filters_number=filters,
+            conv_block_config=cc.ConvolutionalBlockConfig(
+                conv2d_config=cc.Conv2DConfig(
+                    kernel_size=kernel,
+                    use_bias=bias,
+                    kernel_initializer=initializer,
                 ),
+                activation=activation,
+                with_bn=bn,
+                with_dropout=dropout,
             ),
         )
         output = model.call(inputs=tf.random.normal(shape=input_shape))

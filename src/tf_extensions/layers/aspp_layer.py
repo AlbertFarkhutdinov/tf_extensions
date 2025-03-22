@@ -26,8 +26,8 @@ class ASPPLayerConfig(BaseConfig):
 
     """
 
-    filters_number: int
-    dilation_scale: int
+    filters_number: int = 256
+    dilation_scale: int = 6
     dilation_number: int = 3
     kernel_size: tuple[int, ...] = (3, 3)
 

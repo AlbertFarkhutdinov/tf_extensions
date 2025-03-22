@@ -1,30 +1,66 @@
 """The module provides the ASPP based segmentation network."""
+from dataclasses import dataclass
+
 import tensorflow as tf
 
 from tf_extensions.auxiliary.custom_types import MaskType, TrainingType
-from tf_extensions.layers import ASPPLayer
-from tf_extensions.models.base_net import BaseNet
-
-DEFAULT_MIDDLE_FILTERS = 48
-DEFAULT_ASPP_FILTERS = 256
+from tf_extensions.layers.aspp_layer import ASPPLayer, ASPPLayerConfig
+from tf_extensions.models.base_cnn import BaseCNN, BaseCNNConfig
 
 
-class ASPPNet(BaseNet):
+@dataclass
+class ASPPNetConfig(BaseCNNConfig):
+    """
+    Configuration of the ASPPNet model.
+
+    Attributes
+    ----------
+    aspp_config : ASPPLayerConfig
+        Config of Atrous Spatial Pyramid Pooling (ASPP) layer.
+    middle_filters : int
+        Filters number in the middle convolutional layer.
+
+    """
+
+    aspp_config: ASPPLayerConfig = None
+    middle_filters: int = 48
+
+    def __post_init__(self) -> None:
+        """Update configuration fields after initialization."""
+        if self.aspp_config is None:
+            self.aspp_config = ASPPLayerConfig()  # noqa: WPS601
+
+    def get_config_name(self) -> str:
+        """
+        Return the configuration name based on its attributes.
+
+        Returns
+        -------
+        str
+            A string representation of the configuration.
+
+        """
+        return 'aspp{0}middle{1}'.format(
+            self.aspp_config.filters_number,
+            self.middle_filters,
+        )
+
+
+class ASPPNet(BaseCNN):
     """Atrous Spatial Pyramid Pooling (ASPP) based segmentation network."""
+
+    config_type = ASPPNetConfig
 
     def __init__(self, **kwargs) -> None:
         """Initialize self. See help(type(self)) for accurate signature."""
         super().__init__(**kwargs)
-
-        self.conv_pair1 = self.get_convolutional_block(filter_scale=1)
-        self.conv_pair2 = self.get_convolutional_block(filter_scale=2)
-        self.conv_pair3 = self.get_convolutional_block(filter_scale=3)
-        self.conv_pair4 = self.get_convolutional_block(filter_scale=4)
-        self.conv_pair5 = self.get_convolutional_block(filter_scale=4)
-
+        self.conv_blocks = [
+            self.get_convolutional_block(filter_scale=filter_scale)
+            for filter_scale in (1, 2, 3, 4, 4, 3)
+        ]
         conv2d_kwargs = self.config.conv_block_config.conv2d_config.as_dict()
         self.conv_middle = tf.keras.layers.Conv2D(
-            filters=DEFAULT_MIDDLE_FILTERS,
+            filters=self.config.middle_filters,
             kernel_size=(1, 1),
             **{
                 prop_name: prop_value
@@ -32,8 +68,6 @@ class ASPPNet(BaseNet):
                 if prop_name != 'kernel_size'
             },
         )
-
-        self.conv_pair6 = self.get_convolutional_block(filter_scale=3)
         self.conv_out = tf.keras.layers.Conv2D(
             filters=1,
             kernel_size=(1, 1),
@@ -49,10 +83,7 @@ class ASPPNet(BaseNet):
             for _ in range(4)
         ]
         self.aspp = ASPPLayer(
-            filters_number=DEFAULT_ASPP_FILTERS,
-            dilation_scale=6,
-            dilation_number=3,
-            kernel_size=conv2d_kwargs['kernel_size'],
+            **self.config.aspp_config.as_dict(),
         )
 
     def call(
@@ -62,15 +93,15 @@ class ASPPNet(BaseNet):
         mask: MaskType = None,
     ) -> tf.Tensor:
         """
-        Forward pass of the ASPPNet model.
+        Perform a forward pass through the network.
 
         Parameters
         ----------
         inputs : tf.Tensor
             The input tensor.
-        training : bool or tf.Tensor, optional
+        training : TrainingType
             Whether the model is in training mode.
-        mask : tf.Tensor or list of tf.Tensor, optional
+        mask : MaskType
             Mask tensor for specific layers.
 
         Returns
@@ -79,18 +110,18 @@ class ASPPNet(BaseNet):
             Output tensor.
 
         """
-        out = self.conv_pair1(inputs)
+        out = self.conv_blocks[0](inputs)
         out = self.max_pools[0](out)
 
-        out = self.conv_pair2(out)
+        out = self.conv_blocks[1](out)
         out = self.max_pools[1](out)
 
-        out = self.conv_pair3(out)
+        out = self.conv_blocks[2](out)
         out_enc_mid = out
         out = self.max_pools[2](out)
-        out = self.conv_pair4(out)
+        out = self.conv_blocks[3](out)
         out = self.max_pools[3](out)
-        out = self.conv_pair5(out)
+        out = self.conv_blocks[4](out)
 
         out = self.aspp(out)
 
@@ -104,7 +135,7 @@ class ASPPNet(BaseNet):
 
         out = tf.concat([out, out_enc_mid], axis=-1)
 
-        out = self.conv_pair6(out)
+        out = self.conv_blocks[5](out)
         out = self.conv_out(out)
 
         out = tf.image.resize(
