@@ -1,8 +1,6 @@
 """The module contains a base configuration class."""
-from contextlib import suppress
-from dataclasses import Field, asdict, dataclass, fields
-from inspect import signature
-from typing import Optional, TypeVar, Union
+from dataclasses import asdict, dataclass, fields
+from typing import TypeVar, Union
 
 BaseConfigType = TypeVar('BaseConfigType', bound='BaseConfig')
 
@@ -70,11 +68,18 @@ class BaseConfig:
         kwargs = {}
         # noinspection PyTypeChecker
         for cls_field in fields(cls):
-            if cls_field.name in properties:
-                kwargs[cls_field.name] = cls._get_config_property(
-                    cls_field=cls_field,
-                    properties=properties,
-                )
+            if isinstance(properties, BaseConfig):
+                properties_dict = properties.as_dict()
+            else:
+                properties_dict = {**properties}
+            prop = properties_dict.get(cls_field.name)
+            if prop is not None:
+                default_factory = cls_field.default_factory
+                try:
+                    kwargs[cls_field.name] = default_factory.from_dict(prop)
+                except AttributeError:
+                    kwargs[cls_field.name] = prop
+
         # noinspection PyArgumentList
         return cls(**kwargs)
 
@@ -94,58 +99,4 @@ class BaseConfig:
             An instance of the class with the keyword arguments.
 
         """
-        native_args, new_args = {}, {}
-        for name, kwarg in kwargs.items():
-            if name in signature(cls).parameters:
-                native_args[name] = kwarg
-            else:
-                new_args[name] = kwarg
-        # noinspection PyTypeChecker
-        for cls_field in fields(cls):
-            with suppress(AttributeError):
-                native_args[cls_field.name] = (
-                    cls_field.default_factory.from_kwargs(**new_args)
-                )
-        # noinspection PyArgumentList
-        return cls(**native_args)
-
-    @classmethod
-    def _get_config_property(
-        cls,
-        cls_field: Field,
-        properties: dict[str, JSONField],
-    ) -> Optional[Union[BaseConfigType, JSONField]]:
-        """
-        Return a proper config field from a dictionary.
-
-        Parameters
-        ----------
-        cls_field : Field
-            A field of the config.
-        properties : dict
-            A dictionary containing the properties to set on the instance.
-
-        Returns
-        -------
-        any
-            A proper config field from a dictionary.
-
-        Raises
-        ------
-        ValueError
-            If a default factory of a `BaseConfigType` attribute is undefined.
-
-        """
-        if 'config' in cls_field.name:
-            default_factory = cls_field.default_factory
-            try:
-                return default_factory.from_dict(
-                    properties=properties[cls_field.name],
-                )
-            except AttributeError as exc:
-                msg = 'Default factory for `{field}` is undefined.'.format(
-                    field=cls_field.name,
-                )
-                raise ValueError(msg) from exc
-        else:
-            return properties[cls_field.name]
+        return cls.from_dict(kwargs)
