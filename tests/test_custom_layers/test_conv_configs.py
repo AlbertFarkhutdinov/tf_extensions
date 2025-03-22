@@ -16,6 +16,14 @@ def_conv_block = {
     'with_skipped': False,
 }
 
+non_def_conv_block = {
+    'conv2d_config': {
+        'kernel_size': (5, 5),
+        'use_bias': False,
+    },
+    'with_bn': True,
+}
+
 
 class TestConv2DConfig:
 
@@ -75,3 +83,8 @@ class TestConvolutionalBlockConfig:
         )
         config_name = config.get_config_name()
         assert config_name == 'relu3_residual_bn_drop30_kernel5x5'
+
+    def test_non_default(self) -> None:
+        config = cc.ConvolutionalBlockConfig.from_kwargs(**non_def_conv_block)
+        config_name = config.get_config_name()
+        assert config_name == 'relu2_bn_kernel5x5_without_bias'
