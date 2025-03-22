@@ -29,7 +29,8 @@ class SegNetConfig(BaseCNNConfig):
     def __post_init__(self) -> None:
         """Update configuration fields after initialization."""
         super().__post_init__()
-        self.conv_block_config.with_bn = True  # noqa: WPS601
+        if self.__class__.__name__ == 'SegNetConfig':
+            self.conv_block_config.with_bn = True  # noqa: WPS601
 
     def get_config_name(self) -> str:
         """

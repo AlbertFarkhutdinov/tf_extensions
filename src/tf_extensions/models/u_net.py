@@ -51,6 +51,22 @@ class UNetConfig(SegNetConfig):
     vector_length: int = None
     is_binary_classification: bool = False
 
+    def __post_init__(self) -> None:
+        """
+        Validate attributes after initialization.
+
+        Raises
+        ------
+        ValueError
+            If `first_kernel_size` contains even elements.
+
+        """
+        super().__post_init__()
+        first_kernel_size = self.first_kernel_size
+        if first_kernel_size:
+            if not first_kernel_size[0] % 2 or not first_kernel_size[1] % 2:
+                raise ValueError('Odd `first_kernel_size` is recommended.')
+
     def get_config_name(self) -> str:
         """
         Return the configuration name based on its attributes.
@@ -61,44 +77,41 @@ class UNetConfig(SegNetConfig):
             A string representation of the configuration.
 
         """
-        config_name = ''
+        name_parts = [
+            super().get_config_name(),
+        ]
         if self.with_attention:
-            config_name = '{0}_attention'.format(config_name)
+            name_parts.append('attention')
         if self.without_reducing_filters:
-            config_name = '{0}_without_reducing_filters'.format(config_name)
+            name_parts.append('without_reducing_filters')
             if self.is_partial_reducing:
-                config_name = '{0}_partial_reducing'.format(config_name)
+                name_parts.append('partial_reducing')
         if self.first_blocks_without_dropout:
-            config_name = '{config_name}_{blocks_num}without_drop'.format(
-                config_name=config_name,
-                blocks_num=self.first_blocks_without_dropout,
+            name_parts.append(
+                '{0}without_drop'.format(self.first_blocks_without_dropout),
             )
         if self.out_residual_blocks_number:
-            config_name = '{config_name}_out_res{out_res}'.format(
-                config_name=config_name,
-                out_res=self.out_residual_blocks_number,
+            name_parts.append(
+                'out_res{0}'.format(self.out_residual_blocks_number),
             )
             if self.is_skipped_with_concat:
-                config_name = '{0}concat'.format(config_name)
+                name_parts.append('concat')
             else:
-                config_name = '{0}sum'.format(config_name)
+                name_parts.append('sum')
         if self.with_variable_kernel:
-            config_name = '{0}_with_variable_kernel'.format(config_name)
+            name_parts.append('with_variable_kernel')
         if self.first_kernel_size:
-            config_name = '{config_name}_first_kernel{ksize1}x{ksize2}'.format(
-                config_name=config_name,
-                ksize1=self.first_kernel_size[0],
-                ksize2=self.first_kernel_size[1],
+            name_parts.append(
+                'first_kernel{ksize1}x{ksize2}'.format(
+                    ksize1=self.first_kernel_size[0],
+                    ksize2=self.first_kernel_size[1],
+                ),
             )
         if self.vector_length:
-            config_name = '{config_name}_vector_length{vector_length}'.format(
-                config_name=config_name,
-                vector_length=self.vector_length,
+            name_parts.append(
+                'vector_length{0}'.format(self.vector_length),
             )
-        return '{config_name}_{inherited}'.format(
-            config_name=config_name,
-            inherited=super().get_config_name(),
-        ).removeprefix('_')
+        return '_'.join(name_parts)
 
 
 class UNet(BaseCNN):
@@ -134,15 +147,11 @@ class UNet(BaseCNN):
 
     """
 
+    config_type = UNetConfig
+
     def __init__(self, **kwargs) -> None:
         """Initialize self. See help(type(self)) for accurate signature."""
-        if 'config' not in kwargs:
-            kwargs['config'] = UNetConfig()
         super().__init__(**kwargs)
-        first_kernel_size = self.config.first_kernel_size
-        if first_kernel_size:
-            if not first_kernel_size[0] % 2 or not first_kernel_size[1] % 2:
-                raise ValueError('Odd `first_kernel_size` is recommended.')
         self.powers = np.arange(self.config.path_length)
         self.max_pools = []
         self.encoder_layers = []
@@ -163,8 +172,8 @@ class UNet(BaseCNN):
             is_dropout_off = False
             if power < self.config.first_blocks_without_dropout:
                 is_dropout_off = True
-            if first_kernel_size is not None and not power:
-                encoder_kernel_size = first_kernel_size
+            if self.config.first_kernel_size is not None and not power:
+                encoder_kernel_size = self.config.first_kernel_size
             elif self.config.with_variable_kernel:
                 ksize = self.config.conv_block_config.conv2d_config.kernel_size
                 encoder_kernel_size = tuple(
@@ -252,7 +261,7 @@ class UNet(BaseCNN):
         mask: MaskType = None,
     ) -> tf.Tensor:
         """
-        Forward pass of the U-Net model.
+        Perform a forward pass through the network.
 
         Parameters
         ----------

@@ -58,6 +58,8 @@ def_u_net = {
     'with_attention': False,
     'with_variable_kernel': False,
     'first_blocks_without_dropout': 0,
+    'name': 'u_net',
+    'include_top': True,
 }
 
 
@@ -98,18 +100,20 @@ class TestUNetConfig:
             vector_length=128,
         )
         config_name = unet_config.get_config_name()
-        assert config_name == ''.join(
+        assert config_name == '_'.join(
             [
-                'attention_',
-                'without_reducing_filters_',
-                '2without_drop_',
-                'out_res1concat_',
-                'first_kernel7x7_',
-                'vector_length128_',
-                'encoder4_',
-                'input_neurons16_',
-                'relu2_',
+                'u_net',
+                'input_neurons16',
+                'relu2',
                 'kernel3x3',
+                'encoder4',
+                'attention',
+                'without_reducing_filters',
+                '2without_drop',
+                'out_res1',
+                'concat',
+                'first_kernel7x7',
+                'vector_length128',
             ],
         )
 
@@ -137,15 +141,13 @@ class TestUNet:
             match='Odd `first_kernel_size` is recommended.',
         ):
             UNet(
-                config=UNetConfig(
-                    initial_filters_number=filters,
-                    first_kernel_size=first_kernel_size,
-                ),
+                initial_filters_number=filters,
+                first_kernel_size=first_kernel_size,
             )
 
     @pytest.mark.parametrize('config', u_net_configs)
     def test_init(self, config: UNetConfig) -> None:
-        model = UNet(config=config)
+        model = UNet(**config.as_dict())
         assert model.config == config
         length = config.path_length
         pooling = config.pooling
@@ -184,7 +186,7 @@ class TestUNet:
         shape: tuple[int, ...],
         config: UNetConfig,
     ) -> None:
-        model = UNet(config=config)
+        model = UNet(**config.as_dict())
         output = model.call(inputs=tf.random.normal(shape=shape))
         exp_shape = shape
         assert output.shape == exp_shape
