@@ -6,11 +6,11 @@ import tensorflow as tf
 
 from tf_extensions.auxiliary.custom_types import MaskType, TrainingType
 from tf_extensions.layers import MaxPoolingWithArgmax2D, MaxUnpooling2D
-from tf_extensions.models.base_net import BaseNet, BaseNetConfig
+from tf_extensions.models.base_cnn import BaseCNN, BaseCNNConfig
 
 
 @dataclass
-class SegNetConfig(BaseNetConfig):
+class SegNetConfig(BaseCNNConfig):
     """
     Configuration of the SegNet model.
 
@@ -26,6 +26,11 @@ class SegNetConfig(BaseNetConfig):
     path_length: int = 4
     pooling: int = 2
 
+    def __post_init__(self) -> None:
+        """Update configuration fields after initialization."""
+        super().__post_init__()
+        self.conv_block_config.with_bn = True  # noqa: WPS601
+
     def get_config_name(self) -> str:
         """
         Return the configuration name based on its attributes.
@@ -36,26 +41,24 @@ class SegNetConfig(BaseNetConfig):
             A string representation of the configuration.
 
         """
-        config_name = 'encoder{0}'.format(self.path_length)
+        name_parts = [
+            super().get_config_name(),
+            'encoder{0}'.format(self.path_length),
+        ]
         if self.pooling != 2:
-            config_name = '{config_name}_pooling{pooling}'.format(
-                config_name=config_name,
-                pooling=self.pooling,
+            name_parts.append(
+                'pooling{0}'.format(self.pooling),
             )
-        return '{config_name}_{inherited}'.format(
-            config_name=config_name,
-            inherited=super().get_config_name(),
-        )
+        return '_'.join(name_parts)
 
 
-class SegNet(BaseNet):
+class SegNet(BaseCNN):
     """SegNet network."""
+
+    config_type = SegNetConfig
 
     def __init__(self, **kwargs) -> None:
         """Initialize self. See help(type(self)) for accurate signature."""
-        if 'config' not in kwargs:
-            kwargs['config'] = SegNetConfig()
-        kwargs['config'].conv_block_config.with_bn = True
         super().__init__(**kwargs)
         self.powers = np.arange(self.config.path_length)
         self.max_pools = []
@@ -105,15 +108,15 @@ class SegNet(BaseNet):
         mask: MaskType = None,
     ) -> tf.Tensor:
         """
-        Forward pass of the SegNet model.
+        Perform a forward pass through the network.
 
         Parameters
         ----------
         inputs : tf.Tensor
             The input tensor.
-        training : bool or tf.Tensor, optional
+        training : TrainingType
             Whether the model is in training mode.
-        mask : tf.Tensor or list of tf.Tensor, optional
+        mask : MaskType
             Mask tensor for specific layers.
 
         Returns

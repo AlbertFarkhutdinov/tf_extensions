@@ -27,6 +27,7 @@ class ASPPNetConfig(BaseCNNConfig):
 
     def __post_init__(self) -> None:
         """Update configuration fields after initialization."""
+        super().__post_init__()
         if self.aspp_config is None:
             self.aspp_config = ASPPLayerConfig()  # noqa: WPS601
 

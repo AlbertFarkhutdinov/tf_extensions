@@ -30,7 +30,7 @@ def_conv_block = {
     'drop_rate': 0.5,
     'layers_number': 2,
     'activation': 'relu',
-    'with_bn': False,
+    'with_bn': True,
     'with_dropout': False,
     'with_skipped': False,
 }
@@ -40,6 +40,8 @@ def_seg_net = {
     'max_filters_number': None,
     'path_length': 4,
     'pooling': 2,
+    'include_top': True,
+    'name': 'seg_net',
 }
 
 
@@ -47,7 +49,9 @@ class TestSegNetConfig:
 
     def test_init(self) -> None:
         config = SegNetConfig()
-        assert config.conv_block_config == cc.ConvolutionalBlockConfig()
+        assert config.conv_block_config == cc.ConvolutionalBlockConfig(
+            with_bn=True,
+        )
         filters_number = config.initial_filters_number
         assert filters_number == def_seg_net['initial_filters_number']
         assert config.path_length == def_seg_net['path_length']
@@ -68,7 +72,7 @@ class TestSegNetConfig:
         )
         config_name = seg_net_config.get_config_name()
         assert config_name == (
-            'encoder5_pooling3_input_neurons16_relu2_kernel3x3'
+            'seg_net_input_neurons16_relu2_bn_kernel3x3_encoder5_pooling3'
         )
 
 
@@ -107,22 +111,20 @@ class TestSegNet:
         layers: int,
     ) -> None:
         model = SegNet(
-            config=SegNetConfig(
-                initial_filters_number=filters,
-                conv_block_config=cc.ConvolutionalBlockConfig(
-                    conv2d_config=cc.Conv2DConfig(
-                        kernel_size=kernel,
-                        use_bias=bias,
-                        kernel_initializer=init,
-                    ),
-                    layers_number=layers,
-                    activation=act,
-                    with_bn=bn,
-                    with_dropout=dropout,
+            initial_filters_number=filters,
+            conv_block_config=cc.ConvolutionalBlockConfig(
+                conv2d_config=cc.Conv2DConfig(
+                    kernel_size=kernel,
+                    use_bias=bias,
+                    kernel_initializer=init,
                 ),
-                path_length=length,
-                pooling=pooling,
+                layers_number=layers,
+                activation=act,
+                with_bn=bn,
+                with_dropout=dropout,
             ),
+            path_length=length,
+            pooling=pooling,
         )
         assert model.config.path_length == length
         assert model.config.pooling == pooling
@@ -182,22 +184,20 @@ class TestSegNet:
         layers: int,
     ) -> None:
         model = SegNet(
-            config=SegNetConfig(
-                initial_filters_number=filters,
-                conv_block_config=cc.ConvolutionalBlockConfig(
-                    conv2d_config=cc.Conv2DConfig(
-                        kernel_size=kernel,
-                        use_bias=bias,
-                        kernel_initializer=init,
-                    ),
-                    layers_number=layers,
-                    activation=act,
-                    with_bn=bn,
-                    with_dropout=dropout,
+            initial_filters_number=filters,
+            conv_block_config=cc.ConvolutionalBlockConfig(
+                conv2d_config=cc.Conv2DConfig(
+                    kernel_size=kernel,
+                    use_bias=bias,
+                    kernel_initializer=init,
                 ),
-                path_length=length,
-                pooling=pooling,
+                layers_number=layers,
+                activation=act,
+                with_bn=bn,
+                with_dropout=dropout,
             ),
+            path_length=length,
+            pooling=pooling,
         )
         output = model.call(inputs=tf.random.normal(shape=shape))
         assert output.shape == shape

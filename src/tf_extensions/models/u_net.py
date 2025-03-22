@@ -6,7 +6,7 @@ import tensorflow as tf
 
 from tf_extensions import layers as cl
 from tf_extensions.auxiliary.custom_types import MaskType, TrainingType
-from tf_extensions.models.base_net import BaseNet
+from tf_extensions.models.base_cnn import BaseCNN
 from tf_extensions.models.seg_net import SegNetConfig
 
 
@@ -101,7 +101,7 @@ class UNetConfig(SegNetConfig):
         ).removeprefix('_')
 
 
-class UNet(BaseNet):
+class UNet(BaseCNN):
     """
     A U-Net based segmentation model with configurable architecture.
 
@@ -225,7 +225,7 @@ class UNet(BaseNet):
             is_skipped_with_concat=self.config.is_skipped_with_concat,
             blocks_number=self.config.out_residual_blocks_number,
         )
-        if self.include_top:
+        if self.config.include_top:
             if self.config.is_binary_classification:
                 self.flatten_layer = tf.keras.layers.Flatten()
                 self.out_layer = tf.keras.layers.Dense(
@@ -258,9 +258,9 @@ class UNet(BaseNet):
         ----------
         inputs : tf.Tensor
             The input tensor.
-        training : bool or tf.Tensor, optional
+        training : TrainingType
             Whether the model is in training mode.
-        mask : tf.Tensor or list of tf.Tensor, optional
+        mask : MaskType
             Mask tensor for specific layers.
 
         Returns
@@ -296,7 +296,7 @@ class UNet(BaseNet):
                 out = self.decoder_bn_layers[dec_power](out)
 
         out = self.output_skipped_connections(out)
-        if self.include_top:
+        if self.config.include_top:
             if self.config.is_binary_classification:
                 out = self.flatten_layer(out)
                 out = self.out_layer(out)

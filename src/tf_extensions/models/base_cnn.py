@@ -40,6 +40,7 @@ class BaseCNNConfig(BaseNetConfig):
             A string representation of the configuration.
 
         """
+
         name_parts = [
             super().get_config_name(),
             'input_neurons{0}'.format(self.initial_filters_number),
