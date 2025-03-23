@@ -4,7 +4,7 @@ import tensorflow as tf
 from tf_extensions import layers as cl
 from tf_extensions.layers import conv_configs as cc
 from tf_extensions.layers.aspp_layer import ASPPLayerConfig
-from tf_extensions.models.aspp import ASPPNet, ASPPNetConfig
+from tf_extensions.models.aspp_net import ASPPNet, ASPPNetConfig
 from tf_extensions.models.base_net import BaseNetConfig
 
 aspp_net_properties = [
