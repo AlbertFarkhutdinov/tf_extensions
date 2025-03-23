@@ -10,7 +10,7 @@ BaseLoss
 
 """
 from dataclasses import dataclass
-from typing import Any, Type, TypeVar, Union
+from typing import Any, TypeVar, Union
 
 import tensorflow as tf
 from keras import backend as kb
@@ -150,16 +150,16 @@ class BaseLoss(tf.keras.losses.Loss):
         """
         loss_config = {}
         for attr_name, attr_value in config.items():
-            try:
+            if hasattr(attr_value, 'from_config'):  # noqa: WPS421
                 loss_config[attr_name] = attr_value.from_config()
-            except AttributeError:
+            else:
                 loss_config[attr_name] = attr_value
         return cls(**loss_config)
 
     def get_loss_attribute(
         self,
         config: Union[BaseLossInstance, dict[str, Any], None],
-        loss_cls: Type[BaseLossInstance],
+        loss_cls: type[BaseLossInstance],
     ) -> BaseLossInstance:
         """
         Return or create a loss instance from the given configuration.

@@ -42,9 +42,8 @@ class MultiScaleLossConfig(BaseLossConfig):
             msg = 'Loss must be provided.'
             raise ValueError(msg)
         if not self.name:
-            self.name = 'multiscale_{0}'.format(  # noqa: WPS601
-                self.base_loss.name,
-            )
+            base_loss_name = self.base_loss.name
+            self.name = f'multiscale_{base_loss_name}'  # noqa: WPS601
 
 
 MultiScaleLossInstance = TypeVar(
@@ -94,14 +93,15 @@ class MultiScaleLoss(BaseLoss):
 
         """
         if not isinstance(y_true, tuple) or not isinstance(y_pred, tuple):
-            raise ValueError('Inputs must be tuples of tensors.')
+            raise TypeError('Inputs must be tuples of tensors.')
         if len(y_true) != len(y_pred):
             raise ValueError('Lengths of y_true and y_pred must match.')
         if self.config.weights and (len(self.config.weights) != len(y_true)):
             raise ValueError('Lengths of weights and y_true must match.')
         batch_size = y_true[0].shape[0]
         losses = []
-        for level, _ in enumerate(y_true):
+        level_numbers = len(y_true)
+        for level in range(level_numbers):
             self._check_batch_size(
                 y_true=y_true[level],
                 y_pred=y_pred[level],

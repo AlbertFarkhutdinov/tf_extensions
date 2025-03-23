@@ -74,7 +74,7 @@ class BaseNet(tf.keras.Model):
         self.config = self.__class__.config_type.from_kwargs(**kwargs)
         super().__init__()
 
-    def call(
+    def call(  # noqa: PLR6301
         self,
         inputs: tf.Tensor,
         training: TrainingType = None,

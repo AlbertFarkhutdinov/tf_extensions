@@ -76,7 +76,7 @@ class MaxPoolingWithArgmax2D(BaseLayer):
         argmax = tf.cast(argmax, 'int32')
         return output, argmax
 
-    def compute_output_shape(
+    def compute_output_shape(  # noqa: PLR6301
         self,
         input_shape: tuple[int, ...],
     ) -> list[tuple[int, ...]]:
@@ -105,7 +105,7 @@ class MaxPoolingWithArgmax2D(BaseLayer):
         output_shape = tuple(output_shape)
         return [output_shape, output_shape]
 
-    def compute_mask(
+    def compute_mask(  # noqa: PLR6301
         self,
         inputs: Union[tf.Tensor, list[tf.Tensor]],
         mask: Union[tf.Tensor, list[tf.Tensor]] = None,

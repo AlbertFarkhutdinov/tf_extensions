@@ -99,10 +99,7 @@ class FFTLoss(BaseLoss):
             )
 
         spectra_difference = fft_true - fft_pred
-        if self.config.is_averaged_loss:
-            axis = [1, 2, 3]
-        else:
-            axis = 1
+        axis = [1, 2, 3] if self.config.is_averaged_loss else 1
         if loss == 'mse':
             return tf.reduce_mean(
                 tf.square(spectra_difference),
@@ -196,6 +193,7 @@ class FFTLoss(BaseLoss):
     def _get_spectra(
         cls,
         batch: tf.Tensor,
+        *,
         is_xl_averaged: bool,
     ) -> tf.Tensor:
         """

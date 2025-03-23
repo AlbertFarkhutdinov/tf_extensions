@@ -102,7 +102,7 @@ class ConvolutionalBlock(BaseLayer):
                 out = self.dropouts[0](out)
             out = self.activations[layer_id](out)
         if self.config.with_skipped:
-            out = out + self.skipped_connection(inputs)
+            out += self.skipped_connection(inputs)
         return out
 
     def get_config(self) -> dict[str, Any]:

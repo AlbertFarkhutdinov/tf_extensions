@@ -110,10 +110,11 @@ class VGGLoss(VGGBase):
         """
         true_channels = y_true.shape[-1]
         pred_channels = y_pred.shape[-1]
-        if true_channels != 3:
+        req_ch = 3
+        if true_channels != req_ch:
             msg = f'True image has {true_channels} channels. Required: 3.'
             raise ValueError(msg)
-        if pred_channels != 3:
+        if pred_channels != req_ch:
             msg = f'Predicted image has {pred_channels} channels. Required: 3.'
             raise ValueError(msg)
         y_true = preprocess_input(y_true * tf.uint8.max)
@@ -192,10 +193,7 @@ class VGGLoss(VGGBase):
             If filter size in config is too big for the specified VGG layer.
 
         """
-        if self.config.is_preprocessed:
-            max_value = tf.uint8.max
-        else:
-            max_value = 2
+        max_value = tf.uint8.max if self.config.is_preprocessed else 2
         try:
             ssim = tf.image.ssim(
                 img1=true_feat,

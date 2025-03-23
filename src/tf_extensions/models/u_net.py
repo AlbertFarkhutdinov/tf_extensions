@@ -63,9 +63,9 @@ class UNetConfig(SegNetConfig):
         """
         super().__post_init__()
         first_kernel_size = self.first_kernel_size
-        if first_kernel_size:
-            if not first_kernel_size[0] % 2 or not first_kernel_size[1] % 2:
-                raise ValueError('Odd `first_kernel_size` is recommended.')
+        if first_kernel_size and not all(fks % 2 for fks in first_kernel_size):
+            msg = 'Odd `first_kernel_size` is recommended.'
+            raise ValueError(msg)
 
     def get_config_name(self) -> str:
         """

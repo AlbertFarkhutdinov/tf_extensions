@@ -206,10 +206,13 @@ class VGGBase(BaseLoss):
         """
         losses = []
         for true_feat, pred_feat in zip(true_features, pred_features):
-            true_feat = tf.cast(true_feat, self.config.dtype)
-            pred_feat = tf.cast(pred_feat, self.config.dtype)
             loss = tf.reduce_mean(
-                tf.square(true_feat - pred_feat),
+                tf.square(
+                    tf.subtract(
+                        tf.cast(true_feat, self.config.dtype),
+                        tf.cast(pred_feat, self.config.dtype),
+                    ),
+                ),
                 axis=[1, 2, 3],
             )
             losses.append(loss)

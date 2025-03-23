@@ -46,7 +46,8 @@ class SegNetConfig(BaseCNNConfig):
             super().get_config_name(),
             f'encoder{self.path_length}',
         ]
-        if self.pooling != 2:
+        default_pooling = 2
+        if self.pooling != default_pooling:
             name_parts.append(f'pooling{self.pooling}')
         return '_'.join(name_parts)
 

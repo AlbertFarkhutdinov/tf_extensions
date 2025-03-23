@@ -114,7 +114,7 @@ class TestMultiscaleLoss:
     def test_unsupported_input_types(self) -> None:
         ms_loss = cl.MultiScaleLoss(base_loss=cl.SoftDiceLoss())
         with pytest.raises(
-            ValueError,
+            TypeError,
             match='Inputs must be tuples of tensors.',
         ):
             ms_loss(y_true=5, y_pred=3)

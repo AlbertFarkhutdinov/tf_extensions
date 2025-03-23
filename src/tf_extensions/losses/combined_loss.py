@@ -105,9 +105,10 @@ class CombinedLoss(BaseLoss):
 
         """
         config = super().get_config()
-        loss_configs = []
-        for loss in self.config.losses:
-            loss_configs.append(loss.get_config())
+        loss_configs = [
+            loss.get_config()
+            for loss in self.config.losses
+        ]
         config['losses'] = loss_configs
         return config
 
@@ -130,13 +131,12 @@ class CombinedLoss(BaseLoss):
         combined_loss_config = {}
         for attr_name, attr_value in config.items():
             if attr_name == 'losses':
-                losses = []
-                for loss_config in attr_value:
-                    losses.append(
-                        supported_losses[
-                            loss_config['cls_name']
-                        ].from_config(loss_config),
-                    )
+                losses = [
+                    supported_losses[
+                        loss_config['cls_name']
+                    ].from_config(loss_config)
+                    for loss_config in attr_value
+                ]
                 combined_loss_config[attr_name] = losses
             else:
                 combined_loss_config[attr_name] = attr_value

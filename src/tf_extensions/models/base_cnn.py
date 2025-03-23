@@ -66,7 +66,8 @@ class BaseCNN(BaseNet):
     def get_convolutional_block(
         self,
         filter_scale: int,
-        kernel_size: tuple[int, ...] = None,
+        kernel_size: tuple[int, ...] | None = None,
+        *,
         is_dropout_off: bool = False,
     ) -> ConvolutionalBlock:
         """

@@ -114,7 +114,8 @@ class ConvolutionalBlockConfig(BaseConfig):
         if self.with_bn:
             name_parts.append('bn')
         if self.with_dropout:
-            drop_rate_percent = int(round(self.drop_rate * 100))
+            drop_rate_percent = round(self.drop_rate * 100)
+            drop_rate_percent = int(drop_rate_percent)
             name_parts.append(f'drop{drop_rate_percent}')
         name_parts.append(self.conv2d_config.get_config_name())
         return '_'.join(name_parts)

@@ -3,6 +3,8 @@ import logging
 
 import tensorflow as tf
 
+logger = logging.getLogger(__name__)
+
 
 def set_memory_growth() -> str:
     """
@@ -15,7 +17,8 @@ def set_memory_growth() -> str:
 
     """
     gpu_list = tf.config.list_physical_devices('GPU')
-    if gpu_list:
+    gpu_number = len(gpu_list)
+    if gpu_number:
         try:
             for gpu in gpu_list:
                 tf.config.experimental.set_memory_growth(
@@ -24,11 +27,13 @@ def set_memory_growth() -> str:
                 )
         except RuntimeError as exc:
             msg = str(exc)
-            logging.exception(msg)
+            logger.exception(msg)
         logical_gpu_list = tf.config.experimental.list_logical_devices('GPU')
     else:
         logical_gpu_list = []
-    return '{physical} Physical GPUs, {logical} Logical GPUs'.format(
-        physical=len(gpu_list),
-        logical=len(logical_gpu_list),
+    return ', '.join(
+        [
+            f'{gpu_number} Physical GPUs',
+            f'{len(logical_gpu_list)} Logical GPUs',  # noqa: WPS237
+        ],
     )
