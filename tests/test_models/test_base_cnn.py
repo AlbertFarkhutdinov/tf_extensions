@@ -196,10 +196,11 @@ class TestBaseNet:
             'bn',
             'dropout',
             'init',
+            'is_dropout_off',
         ),
         [
-            *[(2, None, *item) for item in base_net_properties],
-            *[(2, (5, 5), *item) for item in base_net_properties],
+            *[(2, None, *item, True) for item in base_net_properties],
+            *[(2, (5, 5), *item, False) for item in base_net_properties],
         ],
     )
     def test_get_convolutional_pair(
@@ -213,6 +214,7 @@ class TestBaseNet:
         bn: bool,
         dropout: bool,
         init: str,
+        is_dropout_off: bool,
     ) -> None:
         model = BaseCNN(
             initial_filters_number=filters,
@@ -230,13 +232,17 @@ class TestBaseNet:
         conv_block = model.get_convolutional_block(
             filter_scale=filter_scale,
             kernel_size=conv_kernel,
+            is_dropout_off=is_dropout_off,
         )
         assert isinstance(conv_block, ConvolutionalBlock)
         assert conv_block.filters == filters * filter_scale
         assert conv_block.config.layers_number == 2
         assert conv_block.config.activation == act
         assert conv_block.config.with_bn == bn
-        assert conv_block.config.with_dropout == dropout
+        if is_dropout_off:
+            assert not conv_block.config.with_dropout
+        else:
+            assert conv_block.config.with_dropout == dropout
         conv2d_config = conv_block.config.conv2d_config
         assert conv2d_config.kernel_size == conv_kernel or kernel
         assert conv2d_config.padding == 'same'

@@ -1,3 +1,5 @@
+import pytest
+
 from tf_extensions.models.base_net import BaseNet, BaseNetConfig
 
 def_base_net = {
@@ -21,10 +23,25 @@ class TestBaseNetConfig:
         config = BaseNetConfig()
         assert config.from_dict(properties=def_base_net) == config
 
-    def test_config_name(self) -> None:
-        config = BaseNetConfig()
+    @pytest.mark.parametrize(
+        ('name', 'include_top', 'expected'),
+        [
+            ('base_net', True, 'base_net'),
+            ('base_net', False, 'base_net_without_top'),
+        ],
+    )
+    def test_config_name(
+        self,
+        name: str,
+        include_top: bool,
+        expected: str,
+    ) -> None:
+        config = BaseNetConfig(
+            name=name,
+            include_top=include_top,
+        )
         config_name = config.get_config_name()
-        assert config_name == 'base_net'
+        assert config_name == expected
 
 
 class TestBaseNet:

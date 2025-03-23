@@ -3,7 +3,8 @@ import tensorflow as tf
 
 from tf_extensions import layers as cl
 from tf_extensions.layers import conv_configs as cc
-from tf_extensions.models.aspp import ASPPNet
+from tf_extensions.layers.aspp_layer import ASPPLayerConfig
+from tf_extensions.models.aspp import ASPPNet, ASPPNetConfig
 from tf_extensions.models.base_net import BaseNetConfig
 
 aspp_net_properties = [
@@ -17,6 +18,19 @@ aspp_net_properties = [
         'glorot_uniform',
     ),
 ]
+
+
+class TestASPPNetConfig:
+
+    def test_init(self) -> None:
+        config = ASPPNetConfig()
+        assert config.aspp_config == ASPPLayerConfig()
+        assert config.middle_filters == 48
+
+    def test_config_name(self) -> None:
+        config = ASPPNetConfig()
+        config_name = config.get_config_name()
+        assert config_name == 'aspp256middle48'
 
 
 class TestASPPNet:

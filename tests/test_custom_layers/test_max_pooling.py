@@ -23,6 +23,7 @@ class TestMaxPoolingWithArgmax2D:
         [
             ((2, 128, 128, 1), [(2, 64, 64, 1), (2, 64, 64, 1)]),
             ((2, 129, 129, 1), [(2, 64, 64, 1), (2, 64, 64, 1)]),
+            ((None, 129, 129, 1), [(None, 64, 64, 1), (None, 64, 64, 1)]),
         ],
     )
     def test_compute_output_shape(
