@@ -3,9 +3,9 @@
 ![GitHub repo size](https://img.shields.io/github/issues/AlbertFarkhutdinov/tf_extensions)
 ![PyPI version](https://img.shields.io/pypi/v/tf-extensions)
 ![GitHub contributors](https://img.shields.io/github/contributors/AlbertFarkhutdinov/tf_extensions)
-![GitHub stars](https://img.shields.io/github/stars/AlbertFarkhutdinov/tf_extensions)
 ![GitHub forks](https://img.shields.io/github/forks/AlbertFarkhutdinov/tf_extensions)
-![GitHub licence](https://img.shields.io/github/license/AlbertFarkhutdinov/tf_extensions)
+![GitHub License](https://img.shields.io/github/license/AlbertFarkhutdinov/tf_extensions)
+![GitHub Repo stars](https://img.shields.io/github/stars/AlbertFarkhutdinov/tf_extensions)
 
 `tf_extensions` is a package that provides custom implementations of layers, losses and models.
 
