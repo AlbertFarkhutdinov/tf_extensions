@@ -53,7 +53,7 @@ class BaseNetConfig(BaseConfig):
         """
         if self.include_top:
             return self.name
-        return '{0}_without_top'.format(self.name)
+        return f'{self.name}_without_top'
 
 
 class BaseNet(tf.keras.Model):
@@ -141,11 +141,12 @@ class BaseNet(tf.keras.Model):
             Representation of the model architecture.
 
         """
+        class_name = self.__class__.__name__
         return tf.keras.utils.plot_model(
             self.build_graph(input_shape),
             *args,
             show_shapes=True,
-            to_file='{0}.png'.format(self.__class__.__name__),
+            to_file=f'{class_name}.png',
             **kwargs,
         )
 

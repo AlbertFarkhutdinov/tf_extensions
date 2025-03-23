@@ -40,15 +40,12 @@ class BaseCNNConfig(BaseNetConfig):
             A string representation of the configuration.
 
         """
-
         name_parts = [
             super().get_config_name(),
-            'input_neurons{0}'.format(self.initial_filters_number),
+            f'input_neurons{self.initial_filters_number}',
         ]
         if self.max_filters_number:
-            name_parts.append(
-                'max_neurons{0}'.format(self.max_filters_number),
-            )
+            name_parts.append(f'max_neurons{self.max_filters_number}')
         name_parts.append(self.conv_block_config.get_config_name())
         return '_'.join(name_parts)
 

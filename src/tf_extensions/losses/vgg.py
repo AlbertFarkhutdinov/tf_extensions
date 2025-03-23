@@ -111,14 +111,10 @@ class VGGLoss(VGGBase):
         true_channels = y_true.shape[-1]
         pred_channels = y_pred.shape[-1]
         if true_channels != 3:
-            msg = 'True image has {0} channels. Required: 3.'.format(
-                true_channels,
-            )
+            msg = f'True image has {true_channels} channels. Required: 3.'
             raise ValueError(msg)
         if pred_channels != 3:
-            msg = 'Predicted image has {0} channels. Required: 3.'.format(
-                pred_channels,
-            )
+            msg = f'Predicted image has {pred_channels} channels. Required: 3.'
             raise ValueError(msg)
         y_true = preprocess_input(y_true * tf.uint8.max)
         y_pred = preprocess_input(y_pred * tf.uint8.max)
@@ -155,19 +151,19 @@ class VGGLoss(VGGBase):
             'mae': self._get_mae,
             'ssim': self._get_dssim,
         }
-        if self.config.loss not in loss_methods:
+        loss_func = self.config.loss
+        if loss_func not in loss_methods:
             raise ValueError(
-                'Unsupported loss function {0}'.format(self.config.loss),
+                f'Unsupported loss function {loss_func}',
             )
         losses = []
         for true_feat, pred_feat in zip(true_features, pred_features):
-            true_feat = tf.cast(true_feat, self.config.dtype)
-            pred_feat = tf.cast(pred_feat, self.config.dtype)
-            loss = loss_methods[self.config.loss](
-                true_feat=true_feat,
-                pred_feat=pred_feat,
+            losses.append(
+                loss_methods[loss_func](
+                    true_feat=tf.cast(true_feat, self.config.dtype),
+                    pred_feat=tf.cast(pred_feat, self.config.dtype),
+                ),
             )
-            losses.append(loss)
         return tf.reduce_sum(losses, axis=0)
 
     def _get_dssim(

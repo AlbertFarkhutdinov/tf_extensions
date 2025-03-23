@@ -88,11 +88,11 @@ class UNetConfig(SegNetConfig):
                 name_parts.append('partial_reducing')
         if self.first_blocks_without_dropout:
             name_parts.append(
-                '{0}without_drop'.format(self.first_blocks_without_dropout),
+                f'{self.first_blocks_without_dropout}without_drop',
             )
         if self.out_residual_blocks_number:
             name_parts.append(
-                'out_res{0}'.format(self.out_residual_blocks_number),
+                f'out_res{self.out_residual_blocks_number}',
             )
             if self.is_skipped_with_concat:
                 name_parts.append('concat')
@@ -100,16 +100,14 @@ class UNetConfig(SegNetConfig):
                 name_parts.append('sum')
         if self.with_variable_kernel:
             name_parts.append('with_variable_kernel')
-        if self.first_kernel_size:
+        first_kernel_size = self.first_kernel_size
+        if first_kernel_size:
             name_parts.append(
-                'first_kernel{ksize1}x{ksize2}'.format(
-                    ksize1=self.first_kernel_size[0],
-                    ksize2=self.first_kernel_size[1],
-                ),
+                f'first_kernel{first_kernel_size[0]}x{first_kernel_size[1]}',
             )
         if self.vector_length:
             name_parts.append(
-                'vector_length{0}'.format(self.vector_length),
+                f'vector_length{self.vector_length}',
             )
         return '_'.join(name_parts)
 

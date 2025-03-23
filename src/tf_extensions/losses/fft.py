@@ -41,7 +41,7 @@ class FFTLossConfig(BaseLossConfig):
         """
         if self.dtype not in {'float32', 'float64'}:
             raise ValueError(
-                'Unsupported dtype in FFTLoss: {0}'.format(self.dtype),
+                f'Unsupported dtype in FFTLoss: {self.dtype}',
             )
 
 
@@ -89,8 +89,9 @@ class FFTLoss(BaseLoss):
             If an unsupported loss function is specified.
 
         """
+        loss = self.config.loss
         fft_true, fft_pred = self._get_fft_pair(y_true=y_true, y_pred=y_pred)
-        if self.config.loss == 'ssim':
+        if loss == 'ssim':
             ssim = self._get_ssim(fft_true=fft_true, fft_pred=fft_pred)
             return tf.divide(
                 tf.convert_to_tensor(value=1, dtype=self.config.dtype) - ssim,
@@ -102,19 +103,17 @@ class FFTLoss(BaseLoss):
             axis = [1, 2, 3]
         else:
             axis = 1
-        if self.config.loss == 'mse':
+        if loss == 'mse':
             return tf.reduce_mean(
                 tf.square(spectra_difference),
                 axis=axis,
             )
-        if self.config.loss == 'mae':
+        if loss == 'mae':
             return tf.reduce_mean(
                 tf.abs(spectra_difference),
                 axis=axis,
             )
-        raise ValueError(
-            'Unsupported loss function {0}'.format(self.config.loss),
-        )
+        raise ValueError(f'Unsupported loss function {loss}')
 
     def _get_fft_pair(
         self,
@@ -180,17 +179,16 @@ class FFTLoss(BaseLoss):
 
         """
         max_true = tf.reduce_max(fft_true)
+        filter_size = self.config.filter_size
         try:
             ssim = tf.image.ssim(
                 img1=fft_true / max_true,
                 img2=fft_pred / max_true,
                 max_val=1,
-                filter_size=self.config.filter_size,
+                filter_size=filter_size,
             )
         except tf.errors.InvalidArgumentError as exc:
-            msg = 'Too small image for filter size {0}'.format(
-                self.config.filter_size,
-            )
+            msg = f'Too small image for filter size {filter_size}'
             raise ValueError(msg) from exc
         return tf.cast(ssim, self.config.dtype)
 

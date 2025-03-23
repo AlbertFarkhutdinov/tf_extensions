@@ -52,7 +52,7 @@ class MultiScaleDSSIMConfig(SSIMBaseConfig):
             ]
         max_level = len(self.power_factors)
         if self.level > max_level:
-            msg = 'Level greater than {0} is not supported.'.format(max_level)
+            msg = f'Level greater than {max_level} is not supported.'
             raise ValueError(msg)
 
 
@@ -245,20 +245,16 @@ class MultiScaleDSSIM(BaseLoss):
             If one of images is less than `min_shape`.
 
         """
-        min_shape = self.min_shape
-        if y_true.shape[1] < min_shape or y_true.shape[2] < min_shape:
+        req_shape = (self.min_shape, self.min_shape)
+        true_shape = y_true.shape[1:3]
+        pred_shape = y_pred.shape[1:3]
+        if any(s1 < s2 for s1, s2 in zip(true_shape, req_shape)):
             raise ValueError(
-                'True image {0} is less than {1}.'.format(
-                    y_true.shape[1:3],
-                    (self.min_shape, self.min_shape),
-                ),
+                f'True image {true_shape} is less than {req_shape}.',
             )
-        if y_pred.shape[1] < min_shape or y_pred.shape[2] < min_shape:
+        if any(s1 < s2 for s1, s2 in zip(pred_shape, req_shape)):
             raise ValueError(
-                'Predicted image {0} is less than {1}.'.format(
-                    y_true.shape[1:3],
-                    (self.min_shape, self.min_shape),
-                ),
+                f'Predicted image {pred_shape} is less than {req_shape}.',
             )
 
     @classmethod

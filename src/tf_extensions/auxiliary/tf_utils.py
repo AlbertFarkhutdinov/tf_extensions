@@ -24,7 +24,7 @@ def set_memory_growth() -> str:
                 )
         except RuntimeError as exc:
             msg = str(exc)
-            logging.error(msg)
+            logging.exception(msg)
         logical_gpu_list = tf.config.experimental.list_logical_devices('GPU')
     else:
         logical_gpu_list = []

@@ -41,10 +41,9 @@ class ASPPNetConfig(BaseCNNConfig):
             A string representation of the configuration.
 
         """
-        return 'aspp{0}middle{1}'.format(
-            self.aspp_config.filters_number,
-            self.middle_filters,
-        )
+        filters_number = self.aspp_config.filters_number
+        middle_filters = self.middle_filters
+        return f'aspp{filters_number}middle{middle_filters}'
 
 
 class ASPPNet(BaseCNN):

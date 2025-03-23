@@ -41,10 +41,9 @@ class DISTSConfig(VGGBaseConfig):
 
         """
         super().__post_init__()
-        if self.texture_weight < 0 or self.texture_weight > 1:
-            msg = 'Texture weight {0} is out of range [0; 1].'.format(
-                self.texture_weight,
-            )
+        texture_weight = self.texture_weight
+        if texture_weight < 0 or texture_weight > 1:
+            msg = f'Texture weight {texture_weight} is out of range [0; 1].'
             raise ValueError(msg)
 
 

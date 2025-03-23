@@ -53,20 +53,17 @@ class Conv2DConfig(BaseConfig):
             A string representation of the configuration.
 
         """
-        config_name = 'kernel{ksize1}x{ksize2}'.format(
-            ksize1=self.kernel_size[0],
-            ksize2=self.kernel_size[1],
-        )
+        kernel_size = self.kernel_size
+        name_parts = [
+            f'kernel{kernel_size[0]}x{kernel_size[1]}',
+        ]
         if self.padding != 'same':
-            config_name = '{0}_pad_{1}'.format(config_name, self.padding)
+            name_parts.append(f'pad_{self.padding}')
         if not self.use_bias:
-            config_name = '{0}_without_bias'.format(config_name)
+            name_parts.append('without_bias')
         if self.kernel_initializer != 'glorot_uniform':
-            config_name = '{config_name}_init_{kernel_initializer}'.format(
-                config_name=config_name,
-                kernel_initializer=self.kernel_initializer,
-            )
-        return config_name
+            name_parts.append(f'init_{self.kernel_initializer}')
+        return '_'.join(name_parts)
 
 
 @dataclass
@@ -111,17 +108,13 @@ class ConvolutionalBlockConfig(BaseConfig):
             A string representation of the configuration.
 
         """
-        config_name = self.activation + str(self.layers_number)
+        name_parts = [self.activation + str(self.layers_number)]
         if self.with_skipped:
-            config_name = '{0}_residual'.format(config_name)
+            name_parts.append('residual')
         if self.with_bn:
-            config_name = '{0}_bn'.format(config_name)
+            name_parts.append('bn')
         if self.with_dropout:
-            config_name = '{config_name}_drop{drop_rate}'.format(
-                config_name=config_name,
-                drop_rate=int(round(self.drop_rate * 100)),
-            )
-        return '{config_name}_{conv2d_config_name}'.format(
-            config_name=config_name,
-            conv2d_config_name=self.conv2d_config.get_config_name(),
-        )
+            drop_rate_percent = int(round(self.drop_rate * 100))
+            name_parts.append(f'drop{drop_rate_percent}')
+        name_parts.append(self.conv2d_config.get_config_name())
+        return '_'.join(name_parts)
