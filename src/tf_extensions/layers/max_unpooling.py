@@ -17,10 +17,13 @@ class MaxUnPoolingConfig(BaseConfig):
     ----------
     pool_size : tuple of int, optional, default: (2, 2)
         Size of the max pooling window.
+    data_type : str, optional, default: 'int32'
+        Type of data in pooling indices tensor.
 
     """
 
     pool_size: tuple[int, ...] = (2, 2)
+    data_type: str = 'int32'
 
 
 class MaxUnpooling2D(BaseLayer):
@@ -47,7 +50,7 @@ class MaxUnpooling2D(BaseLayer):
         **kwargs,
     ) -> tf.Tensor:
         """
-        Forward pass of the MaxUnpooling2D layer.
+        Perform the forward pass of the MaxUnpooling2D layer.
 
         Parameters
         ----------
@@ -62,27 +65,23 @@ class MaxUnpooling2D(BaseLayer):
 
         """
         pooling_values, pooling_indices = inputs[0], inputs[1]
-        data_type = 'int32'
-        pooling_indices = tf.cast(pooling_indices, data_type)
-        input_shape = tf.shape(pooling_values, out_type=data_type)
-
+        pooling_indices = tf.cast(
+            pooling_indices,
+            dtype=self.config.data_type,
+        )
+        input_shape = tf.shape(
+            pooling_values,
+            out_type=self.config.data_type,
+        )
         output_shape = input_shape * np.array([1, *self.config.pool_size, 1])
-        ones_like_indices = tf.ones_like(pooling_indices, dtype=data_type)
-        batches = ones_like_indices * tf.reshape(
-            tf.range(output_shape[0], dtype=data_type),
-            shape=[-1, 1, 1, 1],
-        )
-        features = ones_like_indices * tf.reshape(
-            tf.range(output_shape[-1], dtype=data_type),
-            shape=[1, 1, 1, -1],
-        )
-        rows = pooling_indices // (output_shape[2] * output_shape[3])
-        columns = (pooling_indices // output_shape[3]) % output_shape[2]
 
         scatter = tf.scatter_nd(
             tf.transpose(
                 tf.reshape(
-                    tf.stack([batches, rows, columns, features]),
+                    self._get_stacked_tensor(
+                        pooling_indices=pooling_indices,
+                        output_shape=output_shape,
+                    ),
                     shape=[4, -1],
                 ),
             ),
@@ -91,12 +90,7 @@ class MaxUnpooling2D(BaseLayer):
         )
         return tf.reshape(
             scatter,
-            shape=[
-                -1,
-                input_shape[1] * self.config.pool_size[0],
-                input_shape[2] * self.config.pool_size[1],
-                input_shape[3],
-            ],
+            shape=[-1, *output_shape[1:3], input_shape[3]],
         )
 
     def compute_output_shape(
@@ -125,4 +119,46 @@ class MaxUnpooling2D(BaseLayer):
             mask_shape[1] * self.config.pool_size[0],
             mask_shape[2] * self.config.pool_size[1],
             mask_shape[3],
+        )
+
+    def _get_stacked_tensor(
+        self,
+        pooling_indices: tf.Tensor,
+        output_shape: np.ndarray,
+    ) -> tf.Tensor:
+        """
+        Return a stacked tensor with batch, row, column and  feature indices.
+
+        Parameters
+        ----------
+        pooling_indices : tf.Tensor
+            Pooling indices.
+        output_shape : np.ndarray
+            The shape of the unpooled output tensor.
+
+        Returns
+        -------
+        tf.Tensor
+            A stacked tensor used for scatter operations.
+
+        """
+        ones = tf.ones_like(
+            pooling_indices,
+            dtype=self.config.data_type,
+        )
+        batches = ones * tf.reshape(
+            tf.range(output_shape[0], dtype=self.config.data_type),
+            shape=[-1, 1, 1, 1],
+        )
+        features = ones * tf.reshape(
+            tf.range(output_shape[-1], dtype=self.config.data_type),
+            shape=[1, 1, 1, -1],
+        )
+        return tf.stack(
+            [
+                batches,
+                pooling_indices // (output_shape[2] * output_shape[3]),
+                (pooling_indices // output_shape[3]) % output_shape[2],
+                features,
+            ],
         )
