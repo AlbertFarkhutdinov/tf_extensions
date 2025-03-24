@@ -3,6 +3,7 @@ import pytest
 import tensorflow as tf
 
 import tf_extensions.losses as cl
+from tf_extensions.auxiliary import exceptions
 
 COMBINATIONS = (
     [cl.FFTLoss(), cl.FFTLoss()],
@@ -94,16 +95,23 @@ class TestCombinedLoss:
             if attr_name in config:
                 assert attr_value == config[attr_name]
 
-    def test_combined_loss_without_losses_or_weights(self) -> None:
+    def test_combined_loss_without_losses(self) -> None:
         with pytest.raises(
-            ValueError,
-            match='Losses and weights must be provided as lists.',
+            exceptions.UnspecifiedArgumentError,
+            match='Unspecified argument: "losses".',
         ):
             cl.CombinedLoss()
 
+    def test_combined_loss_without_weights(self) -> None:
+        with pytest.raises(
+            exceptions.UnspecifiedArgumentError,
+            match='Unspecified argument: "weights".',
+        ):
+            cl.CombinedLoss(losses=[])
+
     def test_combined_loss_with_different_lengths(self) -> None:
         with pytest.raises(
-            ValueError,
+            exceptions.NonEqualValuesError,
             match='Losses and weights lists must have the same length.',
         ):
             cl.CombinedLoss(losses=[cl.FFTLoss()], weights=[1, 1, 1])

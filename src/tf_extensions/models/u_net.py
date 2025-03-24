@@ -6,6 +6,7 @@ import tensorflow as tf
 
 from tf_extensions import layers as cl
 from tf_extensions.auxiliary.custom_types import MaskType, TrainingType
+from tf_extensions.auxiliary.exceptions import EvenKernelError
 from tf_extensions.models.base_cnn import BaseCNN
 from tf_extensions.models.seg_net import SegNetConfig
 
@@ -64,8 +65,7 @@ class UNetConfig(SegNetConfig):
         super().__post_init__()
         first_kernel_size = self.first_kernel_size
         if first_kernel_size and not all(fks % 2 for fks in first_kernel_size):
-            msg = 'Odd `first_kernel_size` is recommended.'
-            raise ValueError(msg)
+            raise EvenKernelError(kernel_size=first_kernel_size)
 
     def get_config_name(self) -> str:
         """

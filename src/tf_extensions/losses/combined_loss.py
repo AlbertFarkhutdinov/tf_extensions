@@ -4,6 +4,7 @@ from typing import Any, TypeVar
 
 import tensorflow as tf
 
+from tf_extensions.auxiliary import exceptions
 from tf_extensions.losses.base_loss import BaseLoss, BaseLossConfig
 from tf_extensions.losses.supported_losses import supported_losses
 
@@ -38,12 +39,14 @@ class CombinedLossConfig(BaseLossConfig):
             If losses and weights are not lists with the same length.
 
         """
-        if self.losses is None or self.weights is None:
-            msg = 'Losses and weights must be provided as lists.'
-            raise ValueError(msg)
+        if self.losses is None:
+            raise exceptions.UnspecifiedArgumentError(arg_name='losses')
+        if self.weights is None:
+            raise exceptions.UnspecifiedArgumentError(arg_name='weights')
         if len(self.losses) != len(self.weights):
-            msg = 'Losses and weights lists must have the same length.'
-            raise ValueError(msg)
+            raise exceptions.NonEqualValuesError(
+                msg='Losses and weights lists must have the same length.',
+            )
         if not self.name:
             self.name = '_'.join(  # noqa: WPS601
                 [loss.name for loss in self.losses],

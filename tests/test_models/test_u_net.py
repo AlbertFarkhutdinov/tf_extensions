@@ -5,6 +5,7 @@ import pytest
 import tensorflow as tf
 
 from tf_extensions import layers as cl
+from tf_extensions.auxiliary.exceptions import EvenKernelError
 from tf_extensions.layers import conv_configs as cc
 from tf_extensions.models.u_net import UNet, UNetConfig
 
@@ -137,8 +138,8 @@ class TestUNet:
         first_kernel_size: tuple[int, ...],
     ) -> None:
         with pytest.raises(
-            ValueError,
-            match='Odd `first_kernel_size` is recommended.',
+            EvenKernelError,
+            match='Even kernel is found:',
         ):
             UNet(
                 initial_filters_number=filters,

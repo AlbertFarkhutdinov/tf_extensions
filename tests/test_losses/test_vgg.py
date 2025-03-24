@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import tensorflow as tf
 
+from tf_extensions.auxiliary import exceptions
 from tf_extensions.losses.vgg import VGGLoss
 
 valid_layers_and_filters = [
@@ -242,7 +243,7 @@ class TestVGGLoss:
             filter_size=layer_filter_pair[1],
         )
         with pytest.raises(
-            ValueError,
+            exceptions.WrongNumberError,
             match='Too big filter size for the specified VGG layer.',
         ):
             vgg_loss(
@@ -272,7 +273,7 @@ class TestVGGLoss:
         invalid_shape = (3, 128, 256, 1)
         valid_shape = (3, 128, 256, 3)
         with pytest.raises(
-            ValueError,
+            exceptions.NonEqualValuesError,
             match=r'True image has \d+ channels. Required: 3.',
         ):
             vgg_loss(
@@ -280,7 +281,7 @@ class TestVGGLoss:
                 y_pred=tf.random.normal(shape=valid_shape),
             )
         with pytest.raises(
-            ValueError,
+            exceptions.NonEqualValuesError,
             match=r'Predicted image has \d+ channels. Required: 3.',
         ):
             vgg_loss(
@@ -296,8 +297,8 @@ class TestVGGLoss:
             filter_size=valid_layers_and_filters[0][1],
         )
         with pytest.raises(
-            ValueError,
-            match='Unsupported loss function',
+            exceptions.UnsupportedArgumentError,
+            match='Unsupported value of "loss":',
         ):
             vgg_loss(
                 tf.random.normal(shape=tensor_shapes[0]),

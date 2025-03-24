@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 import tensorflow as tf
 
+from tf_extensions.auxiliary import exceptions
 from tf_extensions.losses.base_loss import BaseLoss, BaseLossConfig
 
 
@@ -40,8 +41,9 @@ class FFTLossConfig(BaseLossConfig):
 
         """
         if self.dtype not in {'float32', 'float64'}:
-            raise ValueError(
-                f'Unsupported dtype in FFTLoss: {self.dtype}',
+            raise exceptions.UnsupportedArgumentError(
+                arg_name='dtype',
+                arg_value=self.dtype,
             )
 
 
@@ -110,7 +112,10 @@ class FFTLoss(BaseLoss):
                 tf.abs(spectra_difference),
                 axis=axis,
             )
-        raise ValueError(f'Unsupported loss function {loss}')
+        raise exceptions.UnsupportedArgumentError(
+            arg_name='loss',
+            arg_value=loss,
+        )
 
     def _get_fft_pair(
         self,
@@ -185,8 +190,9 @@ class FFTLoss(BaseLoss):
                 filter_size=filter_size,
             )
         except tf.errors.InvalidArgumentError as exc:
-            msg = f'Too small image for filter size {filter_size}'
-            raise ValueError(msg) from exc
+            raise exceptions.WrongNumberError(
+                msg=f'Too small image for filter size {filter_size}',
+            ) from exc
         return tf.cast(ssim, self.config.dtype)
 
     @classmethod

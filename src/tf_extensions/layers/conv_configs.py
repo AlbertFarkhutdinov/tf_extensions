@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from tf_extensions.auxiliary.base_config import BaseConfig
+from tf_extensions.auxiliary.exceptions import EvenKernelError
 
 
 @dataclass
@@ -41,7 +42,7 @@ class Conv2DConfig(BaseConfig):
         """
         kernel_size = self.kernel_size
         if not kernel_size[0] % 2 or not kernel_size[1] % 2:
-            raise ValueError('Odd `kernel_size` is recommended.')
+            raise EvenKernelError(kernel_size=kernel_size)
 
     def get_config_name(self) -> str:
         """

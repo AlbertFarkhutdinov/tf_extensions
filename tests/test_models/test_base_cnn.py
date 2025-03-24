@@ -1,5 +1,6 @@
 import pytest
 
+from tf_extensions.auxiliary.exceptions import EvenKernelError
 from tf_extensions.layers import ConvolutionalBlock
 from tf_extensions.layers import conv_configs as cc
 from tf_extensions.models.base_cnn import BaseCNN, BaseCNNConfig
@@ -132,8 +133,8 @@ class TestBaseNet:
         kernel_size: tuple[int, ...],
     ) -> None:
         with pytest.raises(
-            ValueError,
-            match='Odd `kernel_size` is recommended.',
+            EvenKernelError,
+            match='Even kernel is found:',
         ):
             BaseCNN(
                 initial_filters_number=filters,

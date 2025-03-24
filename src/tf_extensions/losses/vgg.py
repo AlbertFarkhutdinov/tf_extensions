@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import tensorflow as tf
 from keras.applications.vgg19 import preprocess_input
 
+from tf_extensions.auxiliary import exceptions
 from tf_extensions.losses.vgg_base import VGGBase, VGGBaseConfig
 
 
@@ -113,10 +114,10 @@ class VGGLoss(VGGBase):
         req_ch = 3
         if true_channels != req_ch:
             msg = f'True image has {true_channels} channels. Required: 3.'
-            raise ValueError(msg)
+            raise exceptions.NonEqualValuesError(msg=msg)
         if pred_channels != req_ch:
             msg = f'Predicted image has {pred_channels} channels. Required: 3.'
-            raise ValueError(msg)
+            raise exceptions.NonEqualValuesError(msg=msg)
         y_true = preprocess_input(y_true * tf.uint8.max)
         y_pred = preprocess_input(y_pred * tf.uint8.max)
         return y_true, y_pred
@@ -154,8 +155,9 @@ class VGGLoss(VGGBase):
         }
         loss_func = self.config.loss
         if loss_func not in loss_methods:
-            raise ValueError(
-                f'Unsupported loss function {loss_func}',
+            raise exceptions.UnsupportedArgumentError(
+                arg_name='loss',
+                arg_value=loss_func,
             )
         losses = []
         for true_feat, pred_feat in zip(true_features, pred_features):
@@ -202,8 +204,9 @@ class VGGLoss(VGGBase):
                 filter_size=self.config.filter_size,
             )
         except tf.errors.InvalidArgumentError as exc:
-            msg = 'Too big filter size for the specified VGG layer.'
-            raise ValueError(msg) from exc
+            raise exceptions.WrongNumberError(
+                msg='Too big filter size for the specified VGG layer.',
+            ) from exc
         ssim = tf.cast(ssim, self.config.dtype)
         return (1 - ssim) / 2
 

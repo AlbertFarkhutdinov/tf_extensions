@@ -4,6 +4,7 @@ from typing import Any, TypeVar
 
 import tensorflow as tf
 
+from tf_extensions.auxiliary import exceptions
 from tf_extensions.losses.base_loss import BaseLoss, BaseLossConfig
 from tf_extensions.losses.supported_losses import supported_losses
 
@@ -39,8 +40,7 @@ class MultiScaleLossConfig(BaseLossConfig):
 
         """
         if self.base_loss is None:
-            msg = 'Loss must be provided.'
-            raise ValueError(msg)
+            raise exceptions.UnspecifiedArgumentError(arg_name='base_loss')
         if not self.name:
             base_loss_name = self.base_loss.name
             self.name = f'multiscale_{base_loss_name}'  # noqa: WPS601
@@ -93,11 +93,17 @@ class MultiScaleLoss(BaseLoss):
 
         """
         if not isinstance(y_true, tuple) or not isinstance(y_pred, tuple):
-            raise TypeError('Inputs must be tuples of tensors.')
+            raise exceptions.WrongTypeError(
+                msg='Inputs must be tuples of tensors.',
+            )
         if len(y_true) != len(y_pred):
-            raise ValueError('Lengths of y_true and y_pred must match.')
+            raise exceptions.NonEqualValuesError(
+                msg='Lengths of y_true and y_pred must match.',
+            )
         if self.config.weights and (len(self.config.weights) != len(y_true)):
-            raise ValueError('Lengths of weights and y_true must match.')
+            raise exceptions.NonEqualValuesError(
+                msg='Lengths of weights and y_true must match.',
+            )
         batch_size = y_true[0].shape[0]
         losses = []
         level_numbers = len(y_true)
@@ -182,6 +188,10 @@ class MultiScaleLoss(BaseLoss):
 
         """
         if y_true.shape[0] != batch_size:
-            raise ValueError('Batch sizes in y_true must match.')
+            raise exceptions.NonEqualValuesError(
+                msg='Batch sizes in y_true must match.',
+            )
         if y_pred.shape[0] != batch_size:
-            raise ValueError('Batch sizes in y_pred must match.')
+            raise exceptions.NonEqualValuesError(
+                msg='Batch sizes in y_pred must match.',
+            )

@@ -3,6 +3,7 @@ import pytest
 import tensorflow as tf
 
 import tf_extensions.losses as cl
+from tf_extensions.auxiliary import exceptions
 
 LOSSES = (
     cl.DISTS(),
@@ -106,15 +107,15 @@ class TestMultiscaleLoss:
 
     def test_without_base_loss(self) -> None:
         with pytest.raises(
-            ValueError,
-            match='Loss must be provided.',
+            exceptions.UnspecifiedArgumentError,
+            match='Unspecified argument: "base_loss".',
         ):
             cl.MultiScaleLoss()
 
     def test_unsupported_input_types(self) -> None:
         ms_loss = cl.MultiScaleLoss(base_loss=cl.SoftDiceLoss())
         with pytest.raises(
-            TypeError,
+            exceptions.WrongTypeError,
             match='Inputs must be tuples of tensors.',
         ):
             ms_loss(y_true=5, y_pred=3)
@@ -122,7 +123,7 @@ class TestMultiscaleLoss:
     def test_different_lengths(self) -> None:
         ms_loss = cl.MultiScaleLoss(base_loss=cl.SoftDiceLoss())
         with pytest.raises(
-            ValueError,
+            exceptions.NonEqualValuesError,
             match='Lengths of y_true and y_pred must match.',
         ):
             ms_loss(
@@ -141,7 +142,7 @@ class TestMultiscaleLoss:
             weights=[1],
         )
         with pytest.raises(
-            ValueError,
+            exceptions.NonEqualValuesError,
             match='Lengths of weights and y_true must match.',
         ):
             ms_loss(
@@ -158,7 +159,7 @@ class TestMultiscaleLoss:
     def test_incorrect_batch_size_true(self) -> None:
         ms_loss = cl.MultiScaleLoss(base_loss=cl.SoftDiceLoss())
         with pytest.raises(
-            ValueError,
+            exceptions.NonEqualValuesError,
             match='Batch sizes in y_true must match.',
         ):
             ms_loss(
@@ -175,7 +176,7 @@ class TestMultiscaleLoss:
     def test_incorrect_batch_size_pred(self) -> None:
         ms_loss = cl.MultiScaleLoss(base_loss=cl.SoftDiceLoss())
         with pytest.raises(
-            ValueError,
+            exceptions.NonEqualValuesError,
             match='Batch sizes in y_pred must match.',
         ):
             ms_loss(

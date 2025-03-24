@@ -2,6 +2,7 @@ import pytest
 import tensorflow as tf
 
 from tf_extensions import losses as cl
+from tf_extensions.auxiliary.exceptions import WrongNumberError
 from tf_extensions.losses.ms_dssim import MultiScaleDSSIMConfig
 
 default_config = {
@@ -33,7 +34,7 @@ class TestMultiScaleDSSIMConfig:
 
     def test_post_init(self) -> None:
         with pytest.raises(
-            ValueError,
+            WrongNumberError,
             match='Level greater than 5 is not supported.',
         ):
             MultiScaleDSSIMConfig(level=6)
@@ -146,7 +147,7 @@ class TestMultiScaleSSIM:
             filter_size=filter_size,
         )
         with pytest.raises(
-            ValueError,
+            WrongNumberError,
             match=r'True image \(\d*, \d*\) is less than \(\d*, \d*\)',
         ):
             loss(
@@ -175,7 +176,7 @@ class TestMultiScaleSSIM:
             filter_size=filter_size,
         )
         with pytest.raises(
-            ValueError,
+            WrongNumberError,
             match=r'Predicted image \(\d*, \d*\) is less than \(\d*, \d*\)',
         ):
             loss(

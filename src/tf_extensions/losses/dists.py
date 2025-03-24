@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 import tensorflow as tf
 
+from tf_extensions.auxiliary.exceptions import WrongNumberError
 from tf_extensions.losses.ssim_calculator import SSIMCalculator
 from tf_extensions.losses.vgg_base import VGGBase, VGGBaseConfig
 
@@ -43,8 +44,9 @@ class DISTSConfig(VGGBaseConfig):
         super().__post_init__()
         texture_weight = self.texture_weight
         if texture_weight < 0 or texture_weight > 1:
-            msg = f'Texture weight {texture_weight} is out of range [0; 1].'
-            raise ValueError(msg)
+            raise WrongNumberError(
+                msg=f'Texture weight {texture_weight} is out of range [0; 1].',
+            )
 
 
 class DISTS(VGGBase):

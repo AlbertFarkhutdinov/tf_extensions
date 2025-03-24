@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 import tensorflow as tf
 
+from tf_extensions.auxiliary.exceptions import WrongNumberError
 from tf_extensions.losses.base_loss import BaseLoss
 from tf_extensions.losses.dssim import DSSIM, SSIMBaseConfig
 
@@ -52,8 +53,9 @@ class MultiScaleDSSIMConfig(SSIMBaseConfig):
             ]
         max_level = len(self.power_factors)
         if self.level > max_level:
-            msg = f'Level greater than {max_level} is not supported.'
-            raise ValueError(msg)
+            raise WrongNumberError(
+                msg=f'Level greater than {max_level} is not supported.',
+            )
 
 
 class MultiScaleDSSIM(BaseLoss):
@@ -249,12 +251,12 @@ class MultiScaleDSSIM(BaseLoss):
         true_shape = y_true.shape[1:3]
         pred_shape = y_pred.shape[1:3]
         if any(s1 < s2 for s1, s2 in zip(true_shape, req_shape)):
-            raise ValueError(
-                f'True image {true_shape} is less than {req_shape}.',
+            raise WrongNumberError(
+                msg=f'True image {true_shape} is less than {req_shape}.',
             )
         if any(s1 < s2 for s1, s2 in zip(pred_shape, req_shape)):
-            raise ValueError(
-                f'Predicted image {pred_shape} is less than {req_shape}.',
+            raise WrongNumberError(
+                msg=f'Predicted image {pred_shape} is less than {req_shape}.',
             )
 
     @classmethod

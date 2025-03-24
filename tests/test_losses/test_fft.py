@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import tensorflow as tf
 
+from tf_extensions.auxiliary import exceptions
 from tf_extensions.losses.fft import FFTLoss, FFTLossConfig
 
 filter_sizes = [11, 22, 33]
@@ -47,7 +48,10 @@ class TestFFTLossConfig:
     """Class for the FFTLossConfig tests."""
 
     def test_post_init(self) -> None:
-        with pytest.raises(ValueError, match='Unsupported dtype in FFTLoss:'):
+        with pytest.raises(
+            exceptions.UnsupportedArgumentError,
+            match='Unsupported value of "dtype":',
+        ):
             FFTLossConfig(dtype='float16')
 
 
@@ -185,8 +189,8 @@ class TestFFTLoss:
             loss='invalid_loss',
         )
         with pytest.raises(
-            ValueError,
-            match='Unsupported loss function',
+            exceptions.UnsupportedArgumentError,
+            match='Unsupported value of "loss":',
         ):
             fft_loss(
                 tf.random.normal(shape=tensor_shapes[0]),
@@ -210,7 +214,7 @@ class TestFFTLoss:
             filter_size=filter_size,
         )
         with pytest.raises(
-            ValueError,
+            exceptions.WrongNumberError,
             match=r'Too small image for filter size \d+.',
         ):
             vgg_loss(

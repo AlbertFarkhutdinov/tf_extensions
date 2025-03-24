@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import tensorflow as tf
 
+from tf_extensions.auxiliary.exceptions import WrongNumberError
 from tf_extensions.losses.dists import DISTS, DISTSConfig
 
 valid_layers = [
@@ -59,7 +60,7 @@ class TestDISTSConfig:
 
     def test_post_init(self) -> None:
         with pytest.raises(
-            ValueError,
+            WrongNumberError,
             match=r'Texture weight (.*) is out of range \[0; 1\].',
         ):
             DISTSConfig(texture_weight=1.5)
